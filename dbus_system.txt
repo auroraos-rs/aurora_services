@@ -1,0 +1,2047 @@
+# DBus System Bus Dump - Aurora OS
+# Generated: 2026-02-21
+# Device: 192.168.2.15 (ssh defaultuser@192.168.2.15)
+# Format: Detailed introspection
+# Total services: 52
+
+================================================================================
+SERVICE 1/52: com.meego.usb_moded
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.Introspectable:
+  Methods:
+    - Introspect() -> s xml
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.freedesktop.DBus.Peer:
+  Methods:
+    - Ping()
+    - GetMachineId() -> s machine_uuid
+  Properties:
+    - None
+  Signals:
+    - None
+
+Child nodes: /com
+
+--- Introspection at /com/meego/usb_moded (dot-to-slash) ---
+Path: /com/meego/usb_moded
+
+com.meego.usb_moded:
+  Methods:
+    - mode_request() -> s mode
+    - get_target_state() -> s mode
+    - get_target_mode_config() -> a{sv} config
+    - set_mode(s mode) -> s mode
+    - set_config(s config) -> s config
+    - get_config() -> s mode
+    - get_modes() -> s modes
+    - get_available_modes() -> s modes
+    - get_available_modes_for_user() -> s modes
+    - hide_mode(s mode) -> s mode
+    - unhide_mode(s mode) -> s mode
+    - get_hidden() -> s modes
+    - get_whitelisted_modes() -> s modes
+    - set_whitelisted_modes(s modes)
+    - set_whitelisted(s mode, b whitelisted)
+    - net_config(s key, s value) -> s key, s value
+    - get_net_config(s key) -> s key, s value
+    - rescue_off()
+    - clear_config(u uid)
+  Properties:
+    - None
+  Signals:
+    - sig_usb_state_ind(s mode_or_event)
+    - sig_usb_current_state_ind(s mode)
+    - sig_usb_target_state_ind(s mode)
+    - sig_usb_taget_mode_config_ind(a{sv} config)
+    - sig_usb_event_ind(s event)
+    - sig_usb_config_ind(s section, s key, s value)
+    - sig_usb_supported_modes_ind(s modes)
+    - sig_usb_available_modes_ind(s modes)
+    - sig_usb_hidden_modes_ind(s modes)
+    - sig_usb_whitelisted_modes_ind(s modes)
+    - sig_usb_state_error_ind(s error)
+
+org.freedesktop.DBus.Introspectable:
+  Methods:
+    - Introspect() -> s xml
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.freedesktop.DBus.Peer:
+  Methods:
+    - Ping()
+    - GetMachineId() -> s machine_uuid
+  Properties:
+    - None
+  Signals:
+    - None
+
+--- Recursive child nodes ---
+
+Path: /com
+(Standard interfaces only, child: meego)
+
+Path: /com/meego
+(Standard interfaces only, child: usb_moded)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 2/52: com.nokia.NonGraphicFeedback1.Backend
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+com.nokia.NonGraphicFeedback1.Backend:
+  Methods:
+    - Play(s event, a(sv) properties) -> u
+    - Pause(u event_id, b pause) -> u
+    - Stop(u event_id) -> u
+  Properties:
+    - None
+  Signals:
+    - Status(u, u)
+
+--- Introspection at /com/nokia/NonGraphicFeedback1/Backend (dot-to-slash) ---
+(Same as above, no additional data)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 3/52: com.nokia.SensorService
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.Introspectable:
+  Methods:
+    - Introspect() -> s xml_data
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.freedesktop.DBus.Peer:
+  Methods:
+    - Ping()
+    - GetMachineId() -> s machine_uuid
+  Properties:
+    - None
+  Signals:
+    - None
+
+Child nodes: /SensorManager
+
+--- Introspection at /com/nokia/SensorService (dot-to-slash) ---
+Error: No such object path '/com/nokia/SensorService'
+
+--- Recursive child nodes ---
+
+Path: /SensorManager
+local.SensorManager:
+  Properties:
+    - errorString: s (read)
+    - errorCodeInt: i (read)
+    - magneticDeviation: i (readwrite)
+  Methods:
+    - loadPlugin(s name) -> b
+    - pluginAvailable(s name) -> b
+    - availablePlugins() -> as
+    - availableSensorPlugins() -> as
+    - requestSensor(s id, x pid) -> i
+    - releaseSensor(s id, i sessionId, x pid) -> b
+    - magneticDeviation() -> d
+    - setMagneticDeviation(d level)
+  Signals:
+    - errorSignal(i error)
+
+org.freedesktop.DBus.Properties:
+  Methods:
+    - Get(s interface_name, s property_name) -> v value
+    - Set(s interface_name, s property_name, v value)
+    - GetAll(s interface_name) -> a{sv} values
+  Signals:
+    - PropertiesChanged(s interface_name, a{sv} changed_properties, as invalidated_properties)
+
+Child nodes: /SensorManager/alssensor, /SensorManager/orientationsensor, /SensorManager/proximitysensor
+
+Path: /SensorManager/alssensor
+local.ALSSensor:
+  Properties:
+    - isValid: b (read)
+    - errorString: s (read)
+    - description: s (read)
+    - id: s (read)
+    - interval: u (read)
+    - standbyOverride: b (read)
+    - bufferInterval: u (read)
+    - bufferSize: u (read)
+    - type: s (read)
+    - errorCodeInt: i (read)
+    - hwBuffering: b (read)
+    - lux: (tu) (read)
+  Methods:
+    - isValid() -> b
+    - errorString() -> s
+    - description() -> s
+    - id() -> s
+    - interval() -> u
+    - standbyOverride() -> b
+    - bufferInterval() -> u
+    - bufferSize() -> u
+    - type() -> s
+    - start(i sessionId)
+    - stop(i sessionId)
+    - setInterval(i sessionId, i value)
+    - getAvailableIntervals() -> a(ddd)
+    - setDefaultInterval(i sessionId) -> b
+    - setStandbyOverride(i sessionId, b value) -> b
+    - setDownsampling(i sessionId, b value)
+    - setBufferInterval(i sessionId, u value)
+    - setBufferSize(i sessionId, u value)
+    - getAvailableBufferIntervals() -> a(uu)
+    - getAvailableBufferSizes() -> a(uu)
+    - getAvailableDataRanges() -> a(ddd)
+    - getCurrentDataRange() -> (ddd)
+    - requestDataRange(i sessionId, (ddd) range)
+    - removeDataRangeRequest(i sessionId)
+    - setDataRangeIndex(i sessionId, i rangeIndex) -> b
+    - hwBuffering() -> b
+    - lux() -> (tu)
+  Signals:
+    - propertyChanged(s name)
+    - ALSChanged((tu) value)
+
+Path: /SensorManager/orientationsensor
+local.OrientationSensor:
+  Properties:
+    - isValid: b (read)
+    - errorString: s (read)
+    - description: s (read)
+    - id: s (read)
+    - interval: u (read)
+    - standbyOverride: b (read)
+    - bufferInterval: u (read)
+    - bufferSize: u (read)
+    - type: s (read)
+    - errorCodeInt: i (read)
+    - hwBuffering: b (read)
+    - orientation: (tu) (read)
+    - threshold: i (readwrite)
+  Methods:
+    - isValid() -> b
+    - errorString() -> s
+    - description() -> s
+    - id() -> s
+    - interval() -> u
+    - standbyOverride() -> b
+    - bufferInterval() -> u
+    - bufferSize() -> u
+    - type() -> s
+    - start(i sessionId)
+    - stop(i sessionId)
+    - setInterval(i sessionId, i value)
+    - getAvailableIntervals() -> a(ddd)
+    - setDefaultInterval(i sessionId) -> b
+    - setStandbyOverride(i sessionId, b value) -> b
+    - setDownsampling(i sessionId, b value)
+    - setBufferInterval(i sessionId, u value)
+    - setBufferSize(i sessionId, u value)
+    - getAvailableBufferIntervals() -> a(uu)
+    - getAvailableBufferSizes() -> a(uu)
+    - getAvailableDataRanges() -> a(ddd)
+    - getCurrentDataRange() -> (ddd)
+    - requestDataRange(i sessionId, (ddd) range)
+    - removeDataRangeRequest(i sessionId)
+    - setDataRangeIndex(i sessionId, i rangeIndex) -> b
+    - hwBuffering() -> b
+    - orientation() -> (tu)
+    - threshold() -> i
+    - setThreshold(i value)
+  Signals:
+    - propertyChanged(s name)
+    - orientationChanged((tu) orientation)
+
+Path: /SensorManager/proximitysensor
+local.ProximitySensor:
+  Properties:
+    - isValid: b (read)
+    - errorString: s (read)
+    - description: s (read)
+    - id: s (read)
+    - interval: u (read)
+    - standbyOverride: b (read)
+    - bufferInterval: u (read)
+    - bufferSize: u (read)
+    - type: s (read)
+    - errorCodeInt: i (read)
+    - hwBuffering: b (read)
+    - proximity: (tu) (read)
+  Methods:
+    - isValid() -> b
+    - errorString() -> s
+    - description() -> s
+    - id() -> s
+    - interval() -> u
+    - standbyOverride() -> b
+    - bufferInterval() -> u
+    - bufferSize() -> u
+    - type() -> s
+    - start(i sessionId)
+    - stop(i sessionId)
+    - setInterval(i sessionId, i value)
+    - getAvailableIntervals() -> a(ddd)
+    - setDefaultInterval(i sessionId) -> b
+    - setStandbyOverride(i sessionId, b value) -> b
+    - setDownsampling(i sessionId, b value)
+    - setBufferInterval(i sessionId, u value)
+    - setBufferSize(i sessionId, u value)
+    - getAvailableBufferIntervals() -> a(uu)
+    - getAvailableBufferSizes() -> a(uu)
+    - getAvailableDataRanges() -> a(ddd)
+    - getCurrentDataRange() -> (ddd)
+    - requestDataRange(i sessionId, (ddd) range)
+    - removeDataRangeRequest(i sessionId)
+    - setDataRangeIndex(i sessionId, i rangeIndex) -> b
+    - hwBuffering() -> b
+    - proximity() -> (tu)
+  Signals:
+    - propertyChanged(s name)
+    - dataAvailable((tu) data)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 4/52: com.nokia.diskmonitor
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.Introspectable:
+  Methods:
+    - Introspect() -> s data
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.freedesktop.DBus.Peer:
+  Methods:
+    - Ping()
+    - GetMachineId() -> s machine_uuid
+  Properties:
+    - None
+  Signals:
+    - None
+
+Child nodes: /com
+
+--- Introspection at /com/nokia/diskmonitor (dot-to-slash) ---
+Path: /com/nokia/diskmonitor
+
+Child nodes: /com/nokia/diskmonitor/signal, /com/nokia/diskmonitor/request
+
+--- Recursive child nodes ---
+
+Path: /com/nokia/diskmonitor/signal
+com.nokia.diskmonitor.signal:
+  Methods:
+    - None
+  Properties:
+    - None
+  Signals:
+    - disk_space_state_ind(s mount_point, i diskspace_state)
+
+Path: /com/nokia/diskmonitor/request
+com.nokia.diskmonitor.request:
+  Methods:
+    - req_check()
+  Properties:
+    - None
+  Signals:
+    - None
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 5/52: com.nokia.dsme
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.Introspectable:
+  Methods:
+    - Introspect() -> s data
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.freedesktop.DBus.Peer:
+  Methods:
+    - Ping()
+    - GetMachineId() -> s machine_uuid
+  Properties:
+    - None
+  Signals:
+    - None
+
+Child nodes: /com
+
+--- Introspection at /com/nokia/dsme (dot-to-slash) ---
+Path: /com/nokia/dsme
+
+Child nodes: /com/nokia/dsme/signal, /com/nokia/dsme/request
+
+--- Recursive child nodes ---
+
+Path: /com/nokia/dsme/signal
+com.nokia.dsme.signal:
+  Methods:
+    - None
+  Properties:
+    - None
+  Signals:
+    - state_change_ind(s state)
+    - save_unsaved_data_ind()
+    - battery_empty_ind()
+    - thermal_shutdown_ind()
+    - shutdown_ind()
+    - denied_req_ind(s denied_state, s reason)
+
+Path: /com/nokia/dsme/request
+com.nokia.dsme.request:
+  Methods:
+    - get_version() -> s version
+    - get_state() -> s state
+    - req_powerup()
+    - req_reboot()
+    - req_shutdown()
+  Properties:
+    - None
+  Signals:
+    - None
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 6/52: com.nokia.mce
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.Introspectable:
+  Methods:
+    - Introspect() -> s data
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.freedesktop.DBus.Peer:
+  Methods:
+    - Ping()
+    - GetMachineId() -> s machine_uuid
+  Properties:
+    - None
+  Signals:
+    - None
+
+Child nodes: /com
+
+--- Introspection at /com/nokia/mce (dot-to-slash) ---
+Path: /com/nokia/mce
+
+Child nodes: /com/nokia/mce/signal, /com/nokia/mce/request
+
+--- Recursive child nodes ---
+
+Path: /com/nokia/mce/signal
+com.nokia.mce.signal:
+  Methods:
+    - None
+  Properties:
+    - None
+  Signals:
+    - sig_button_backlight_ind(b enabled)
+    - psm_state_ind(b psm_active)
+    - sig_call_state_ind(s call_state, s call_type)
+    - system_inactivity_ind(b device_inactive)
+    - led_pattern_deactivated_ind(s pattern_name)
+    - led_pattern_activated_ind(s pattern_name)
+    - fader_opacity_ind(i fader_opacity_percent, i transition_length)
+    - display_status_ind(s display_state_curr)
+    - display_blanking_inhibit_ind(s blanking_inhibit)
+    - display_blanking_pause_allowed_ind(b allowed)
+    - display_blanking_pause_ind(s blanking_pause)
+    - color_profile_ind(s active_color_profile)
+    - radio_states_ind(u radio_states)
+    - sig_memory_level_ind(s memory_level)
+    - battery_level_ind(i battery_level)
+    - battery_state_ind(s battery_state)
+    - battery_status_ind(s battery_status)
+    - charger_state_ind(s charger_state)
+    - charger_type_ind(s charger_type)
+    - usb_cable_state_ind(s usb_cable_state)
+    - display_blanking_policy_ind(s blanking_policy)
+    - mouse_available_state_ind(s mouse_state)
+    - keyboard_available_state_ind(s keyboard_state)
+    - keyboard_slide_state_ind(s slide_state)
+    - lpm_ui_mode_ind(s lpm_mode)
+    - tklock_mode_ind(s tklock_mode)
+    - touch_input_policy_ind(s input_policy)
+    - keypad_input_policy_ind(s input_policy)
+    - power_button_trigger(s event)
+    - call_ui_feedback_ind(s event)
+    - alarm_ui_feedback_ind(s event)
+    - config_change_ind(s key_name, v key_value)
+
+Path: /com/nokia/mce/request
+com.nokia.mce.request:
+  Methods:
+    - get_button_backlight() -> b enabled
+    - req_button_backlight_mode(i mode)
+    - req_button_backlight_change(b enable)
+    - req_cpu_keepalive_wakeup() -> b success
+    - req_cpu_keepalive_stop(s session_id) -> b success
+    - req_cpu_keepalive_start(s session_id) -> b success
+    - req_cpu_keepalive_period(s session_id) -> i period
+    - get_psm_state() -> b power_saving_mode_active
+    - get_call_state() -> s call_state, s call_type
+    - req_call_state_change(s call_state, s call_type) -> b accepted
+    - remove_activity_callback()
+    - add_activity_callback(s service_name, s object_path, s interface_name, s method_name) -> b added
+    - get_inactivity_status() -> b device_inactive
+    - req_led_disable()
+    - req_led_enable()
+    - req_led_pattern_deactivate(s pattern_name)
+    - req_led_pattern_activate(s pattern_name)
+    - get_key_backlight_state() -> b backlight_state
+    - get_display_stats() -> a{s(xx)} display_state_statistics
+    - req_cabc_mode(s requested_cabc_mode) -> s activated_cabc_mode
+    - req_display_cancel_blanking_pause()
+    - req_display_blanking_pause()
+    - req_display_state_lpm()
+    - req_display_state_off()
+    - req_display_state_dim()
+    - req_display_state_on()
+    - get_cabc_mode() -> s cabc_mode
+    - get_display_status() -> s display_state_curr
+    - get_display_blanking_inhibit() -> s blanking_inhibit
+    - get_display_blanking_pause_allowed() -> b allowed
+    - get_display_blanking_pause() -> s blanking_pause
+    - req_color_profile_change(s profile_name) -> b success
+    - get_color_profile_ids() -> as profile_names
+    - get_color_profile() -> s profile_name
+    - req_radio_states_change(u radio_states, u states_to_chage)
+    - get_radio_states() -> u radio_states
+    - get_memory_level() -> s memory_level
+    - get_battery_level() -> i battery_level
+    - get_battery_state() -> s battery_state
+    - get_battery_status() -> s battery_status
+    - get_charger_state() -> s charger_state
+    - get_charger_type() -> s charger_type
+    - get_usb_cable_state() -> s usb_cable_state
+    - get_display_blanking_policy() -> s blanking_policy
+    - mouse_available_state_req() -> s mouse_state
+    - keyboard_available_state_req() -> s keyboard_state
+    - keyboard_slide_state_req() -> s slide_state
+    - notification_end_req(s notification_name, i linger_time)
+    - notification_begin_req(s notification_name, i duration_time, i activity_extend_time)
+    - tklock_callback(i lock_status)
+    - req_tklock_mode_change(s mode_name)
+    - get_tklock_mode() -> s mode_name
+    - get_touch_input_policy() -> s input_policy
+    - get_keypad_input_policy() -> s input_policy
+    - req_ignore_incoming_call()
+    - req_trigger_powerkey_event(u action)
+    - set_verbosity(i level)
+    - get_verbosity() -> i level
+    - get_suspend_stats() -> x uptime_ms, x suspend_ms
+    - reset_config(s key_part) -> i count
+    - set_config(s key_name, v key_value) -> b success
+    - get_config_all() -> a{sv} values
+    - get_config(s key_name) -> v key_value
+    - get_version() -> s version
+  Properties:
+    - None
+  Signals:
+    - None
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 7/52: com.nokia.thermalmanager
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.Introspectable:
+  Methods:
+    - Introspect() -> s data
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.freedesktop.DBus.Peer:
+  Methods:
+    - Ping()
+    - GetMachineId() -> s machine_uuid
+  Properties:
+    - None
+  Signals:
+    - None
+
+Child nodes: /com
+
+--- Introspection at /com/nokia/thermalmanager (dot-to-slash) ---
+Path: /com/nokia/thermalmanager
+
+com.nokia.thermalmanager:
+  Methods:
+    - get_thermal_state() -> s status
+    - estimate_surface_temperature() -> i temperature
+    - core_temperature() -> i temperature
+    - battery_temperature() -> i temperature
+    - sensor_temperature(s sensor) -> i temperature
+  Properties:
+    - None
+  Signals:
+    - thermal_state_change_ind(s state)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 8/52: com.nokia.time
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.Introspectable:
+  Methods:
+    - Introspect() -> s xml_data
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.freedesktop.DBus.Peer:
+  Methods:
+    - Ping()
+    - GetMachineId() -> s machine_uuid
+  Properties:
+    - None
+  Signals:
+    - None
+
+Child nodes: /com
+
+--- Introspection at /com/nokia/time (dot-to-slash) ---
+Path: /com/nokia/time
+
+com.nokia.time:
+  Methods:
+    - mode(s mode) -> b
+    - get_wall_clock_info() -> (bbbba(iu)asaiai(iu)ssisbs)
+    - wall_clock_settings((u(iu)is) p) -> b
+    - add_event((iuuuuus(a{ss})ua((a{ss})u)a(u(a{ss})a(sb))a(tuuuuuxx)iia(sb)) x) -> u
+    - add_events((a(iuuuuus(a{ss})ua((a{ss})u)a(u(a{ss})a(sb))a(tuuuuuxx)iia(sb))) lst) -> av res
+    - get_event(u cookie) -> (iuuuuus(a{ss})ua((a{ss})u)a(u(a{ss})a(sb))a(tuuuuuxx)iia(sb))
+    - get_events(au cookies) -> (a(iuuuuus(a{ss})ua((a{ss})u)a(u(a{ss})a(sb))a(tuuuuuxx)iia(sb)))
+    - replace_event((iuuuuus(a{ss})ua((a{ss})u)a(u(a{ss})a(sb))a(tuuuuuxx)iia(sb)) x, u old) -> u
+    - dialog_response(u cookie, i value) -> b
+    - query(a{sv} words) -> av res
+    - query_attributes(u cookie) -> a{sv}
+    - get_attributes_by_cookie(u cookie) -> a{ss}
+    - get_attributes_by_cookies(au cookies) -> a{ua{ss}}
+    - get_cookies_by_attributes(a{ss} words) -> au
+    - cancel(u cookie) -> b
+    - cancel_events(au cookies) -> au failed
+    - dismiss(u cookie) -> b
+    - ping() -> s
+    - parse(s text) -> s
+    - pid() -> i
+    - enable_alarms(b enable)
+    - alarms_enabled() -> b
+    - set_default_snooze(i value) -> b
+    - get_default_snooze() -> i
+    - set_app_snooze(s name, i value) -> b
+    - get_app_snooze(s name) -> i
+    - remove_app_snooze(s name)
+    - get_alarm_present() -> b
+    - get_alarm_triggers() -> a{uu}
+    - halt(s what)
+    - fake_csd_time_signal(s modem, s mcc, s mnc, i offset, i time, i dst, i seconds, i nano_seconds) -> b
+    - fake_csd_time_signal_now(s modem, s mcc, s mnc, i offset, i time, i dst) -> b
+    - fake_nitz_signal(i mcc, i offset, i time, i dst) -> b
+    - fake_operator_signal(s modem, s mcc, s mnc) -> b
+  Properties:
+    - None
+  Signals:
+    - settings_changed((bbbba(iu)asaiai(iu)ssisbs), b)
+    - settings_changed_1(b)
+    - next_bootup_event(i next_boot_event, i next_non_boot_event)
+    - alarm_present_changed(b present)
+    - alarm_triggers_changed(a{uu})
+
+org.freedesktop.DBus.Properties:
+  Methods:
+    - Get(s interface_name, s property_name) -> v value
+    - Set(s interface_name, s property_name, v value)
+    - GetAll(s interface_name) -> a{sv} values
+  Signals:
+    - PropertiesChanged(s interface_name, a{sv} changed_properties, as invalidated_properties)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 9/52: fi.w1.wpa_supplicant1
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: Access denied (requires root privileges)
+
+--- Introspection at /fi/w1/wpa_supplicant1 (dot-to-slash) ---
+Error: Access denied (requires root privileges)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 10/52: net.connman
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+net.connman.Manager:
+  Methods:
+    - GetProperties() -> a{sv} properties
+    - SetProperty(s name, v value)
+    - GetTechnologies() -> a(oa{sv}) technologies
+    - RemoveProvider(o provider) [deprecated]
+    - GetServices() -> a(oa{sv}) services
+    - GetPeers() -> a(oa{sv}) peers
+    - ConnectProvider(a{sv} provider) -> o path [deprecated]
+    - RegisterAgent(o path)
+    - UnregisterAgent(o path)
+    - RegisterCounter(o path, u accuracy, u period)
+    - UnregisterCounter(o path)
+    - ResetCounters(s type)
+    - CreateService(s service_type, s device_ident, s network_ident, a(ss) settings) -> o service
+    - CreateSession(a{sv} settings, o notifier) -> o session
+    - DestroySession(o session)
+    - RequestPrivateNetwork() -> o path, a{sv} settings, h socket
+    - ReleasePrivateNetwork(o path)
+    - RegisterPeerService(a{sv} specification, b master)
+    - UnregisterPeerService(a{sv} specification)
+  Properties:
+    - None
+  Signals:
+    - PropertyChanged(s name, v value)
+    - TechnologyAdded(o path, a{sv} properties)
+    - TechnologyRemoved(o path)
+    - ServicesChanged(a(oa{sv}) changed, ao removed)
+    - PeersChanged(a(oa{sv}) changed, ao removed)
+
+net.connman.Storage:
+  Methods:
+    - ChangeUser(u uid)
+  Properties:
+    - None
+  Signals:
+    - None
+
+net.connman.Firewall:
+  Methods:
+    - Reload()
+  Properties:
+    - None
+  Signals:
+    - None
+
+net.connman.Clock:
+  Methods:
+    - GetProperties() -> a{sv} properties
+    - SetProperty(s name, v value)
+  Properties:
+    - None
+  Signals:
+    - PropertyChanged(s name, v value)
+
+org.sailfishos.connman.GlobalProxy:
+  Methods:
+    - SetProperty(s name, v value)
+    - GetProperty(s name) -> v value
+  Properties:
+    - None
+  Signals:
+    - PropertyChanged(s name, v value)
+
+Child nodes: /net, /org
+
+--- Introspection at /net/connman (dot-to-slash) ---
+Path: /net/connman
+
+Child nodes: /net/connman/neard_handover_agent, /net/connman/service, /net/connman/technology
+
+--- Recursive child nodes ---
+
+Path: /net/connman/technology
+Child nodes: bluetooth, ethernet, gadget, gps, wifi
+
+Path: /net/connman/technology/wifi
+net.connman.Technology:
+  Methods:
+    - GetProperties() -> a{sv} properties [deprecated]
+    - SetProperty(s name, v value)
+    - Scan()
+    - StopScan()
+  Properties:
+    - None
+  Signals:
+    - PropertyChanged(s name, v value)
+
+Path: /net/connman/service
+Child nodes: (dynamic services: ethernet_*, wifi_*, etc.)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 11/52: net.connman.vpn
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+net.connman.vpn.Manager:
+  Methods:
+    - Create(a{sv} properties) -> o path
+    - Remove(o identifier)
+    - GetConnections() -> a(oa{sv}) connections
+    - RegisterAgent(o path)
+    - UnregisterAgent(o path)
+  Properties:
+    - None
+  Signals:
+    - ConnectionAdded(o identifier, a{sv} properties)
+    - ConnectionRemoved(o identifier)
+
+net.connman.vpn.Storage:
+  Methods:
+    - ChangeUser(u uid)
+  Properties:
+    - None
+  Signals:
+    - None
+
+--- Introspection at /net/connman/vpn (dot-to-slash) ---
+Path: /net/connman/vpn
+(Empty node, no interfaces)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 12/52: org.bluez
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.ObjectManager:
+  Methods:
+    - GetManagedObjects() -> a{oa{sa{sv}}} objects
+  Properties:
+    - None
+  Signals:
+    - InterfacesAdded(o object, a{sa{sv}} interfaces)
+    - InterfacesRemoved(o object, as interfaces)
+
+--- Introspection at /org/bluez (dot-to-slash) ---
+Path: /org/bluez
+
+org.bluez.AgentManager1:
+  Methods:
+    - RegisterAgent(o agent, s capability)
+    - UnregisterAgent(o agent)
+    - RequestDefaultAgent(o agent)
+  Properties:
+    - None
+  Signals:
+    - None
+
+org.bluez.ProfileManager1:
+  Methods:
+    - RegisterProfile(o profile, s UUID, a{sv} options)
+    - UnregisterProfile(o profile)
+  Properties:
+    - None
+  Signals:
+    - None
+
+Child nodes: /org/bluez/hci0, /org/bluez/neard_handover_agent
+
+--- Recursive child nodes ---
+
+Path: /org/bluez/hci0
+org.bluez.Adapter1:
+  Properties:
+    - Address: s (read)
+    - AddressType: s (read)
+    - Name: s (read)
+    - Alias: s (readwrite)
+    - Class: u (read)
+    - Powered: b (readwrite)
+    - Discoverable: b (readwrite)
+    - DiscoverableTimeout: u (readwrite)
+    - Pairable: b (readwrite)
+    - PairableTimeout: u (readwrite)
+    - Discovering: b (read)
+    - UUIDs: as (read)
+    - Modalias: s (read)
+    - Roles: as (read)
+    - ExperimentalFeatures: as (read)
+    - Manufacturer: q (read)
+    - Version: y (read)
+  Methods:
+    - StartDiscovery()
+    - SetDiscoveryFilter(a{sv} properties)
+    - StopDiscovery()
+    - RemoveDevice(o device)
+    - GetDiscoveryFilters() -> as filters
+
+org.bluez.BatteryProviderManager1:
+  Methods:
+    - RegisterBatteryProvider(o provider)
+    - UnregisterBatteryProvider(o provider)
+
+org.bluez.GattManager1:
+  Methods:
+    - RegisterApplication(o application, a{sv} options)
+    - UnregisterApplication(o application)
+
+org.bluez.Media1:
+  Properties:
+    - SupportedUUIDs: as (read)
+  Methods:
+    - RegisterEndpoint(o endpoint, a{sv} properties)
+    - UnregisterEndpoint(o endpoint)
+    - RegisterPlayer(o player, a{sv} properties)
+    - UnregisterPlayer(o player)
+    - RegisterApplication(o application, a{sv} options)
+    - UnregisterApplication(o application)
+
+org.bluez.LEAdvertisingManager1:
+  Properties:
+    - ActiveInstances: y (read)
+    - SupportedInstances: y (read)
+    - SupportedIncludes: as (read)
+    - SupportedSecondaryChannels: as (read)
+  Methods:
+    - RegisterAdvertisement(o advertisement, a{sv} options)
+    - UnregisterAdvertisement(o service)
+
+Child nodes: dev_* (paired Bluetooth devices)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 13/52: org.freedesktop.DBus
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus:
+  Properties:
+    - Features: as (read)
+    - Interfaces: as (read)
+  Methods:
+    - Hello() -> s
+    - RequestName(s, u) -> u
+    - ReleaseName(s) -> u
+    - StartServiceByName(s, u) -> u
+    - UpdateActivationEnvironment(a{ss})
+    - NameHasOwner(s) -> b
+    - ListNames() -> as
+    - ListActivatableNames() -> as
+    - AddMatch(s)
+    - RemoveMatch(s)
+    - GetNameOwner(s) -> s
+    - ListQueuedOwners(s) -> as
+    - GetConnectionUnixUser(s) -> u
+    - GetConnectionUnixProcessID(s) -> u
+    - GetAdtAuditSessionData(s) -> ay
+    - GetConnectionSELinuxSecurityContext(s) -> ay
+    - ReloadConfig()
+    - GetId() -> s
+    - GetConnectionCredentials(s) -> a{sv}
+  Signals:
+    - NameOwnerChanged(s, s, s)
+    - NameLost(s)
+    - NameAcquired(s)
+
+--- Introspection at /org/freedesktop/DBus (dot-to-slash) ---
+(Same as above, with additional interfaces)
+
+org.freedesktop.DBus.Properties:
+  Methods:
+    - Get(s, s) -> v
+    - GetAll(s) -> a{sv}
+    - Set(s, s, v)
+
+org.freedesktop.DBus.Monitoring:
+  Methods:
+    - BecomeMonitor(as, u)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 14/52: org.freedesktop.PolicyKit1
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Empty node, child: org)
+
+--- Introspection at /org/freedesktop/PolicyKit1 (dot-to-slash) ---
+Path: /org/freedesktop/PolicyKit1
+
+(Empty node, child: Authority)
+
+--- Recursive child nodes ---
+
+Path: /org/freedesktop/PolicyKit1/Authority
+org.freedesktop.PolicyKit1.Authority:
+  Properties:
+    - BackendName: s (read)
+    - BackendVersion: s (read)
+    - BackendFeatures: u (read)
+  Methods:
+    - EnumerateActions(s locale) -> a(ssssssuuua{ss}) action_descriptions
+    - CheckAuthorization((sa{sv}) subject, s action_id, a{ss} details, u flags, s cancellation_id) -> (bba{ss}) result
+    - CancelCheckAuthorization(s cancellation_id)
+    - RegisterAuthenticationAgent((sa{sv}) subject, s locale, s object_path)
+    - RegisterAuthenticationAgentWithOptions((sa{sv}) subject, s locale, s object_path, a{sv} options)
+    - UnregisterAuthenticationAgent((sa{sv}) subject, s object_path)
+    - AuthenticationAgentResponse(s cookie, (sa{sv}) identity)
+    - AuthenticationAgentResponse2(u uid, s cookie, (sa{sv}) identity)
+    - EnumerateTemporaryAuthorizations((sa{sv}) subject) -> a(ss(sa{sv})tt) temporary_authorizations
+    - RevokeTemporaryAuthorizations((sa{sv}) subject)
+    - RevokeTemporaryAuthorizationById(s id)
+  Signals:
+    - Changed()
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 15/52: org.freedesktop.UDisks2
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Empty node, child: org)
+
+--- Introspection at /org/freedesktop/UDisks2 (dot-to-slash) ---
+Path: /org/freedesktop/UDisks2
+
+org.freedesktop.DBus.ObjectManager:
+  Methods:
+    - GetManagedObjects() -> a{oa{sa{sv}}} object_paths_interfaces_and_properties
+  Properties:
+    - None
+  Signals:
+    - InterfacesAdded(o object_path, a{sa{sv}} interfaces_and_properties)
+    - InterfacesRemoved(o object_path, as interfaces)
+
+Child nodes: /org/freedesktop/UDisks2/drives, /org/freedesktop/UDisks2/Manager, /org/freedesktop/UDisks2/block_devices
+
+--- Recursive child nodes ---
+
+(Dynamic objects managed by ObjectManager: drives/*, block_devices/*)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 16/52: org.freedesktop.login1
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces only, child: org)
+
+--- Introspection at /org/freedesktop/login1 (dot-to-slash) ---
+Path: /org/freedesktop/login1
+
+org.freedesktop.login1.Manager:
+  Properties:
+    - EnableWallMessages: b (readwrite, privileged)
+    - WallMessage: s (readwrite, privileged)
+    - NAutoVTs: u (read)
+    - KillOnlyUsers: as (read)
+    - KillExcludeUsers: as (read)
+    - KillUserProcesses: b (read)
+    - RebootToFirmwareSetup: b (read)
+    - IdleHint: b (read)
+    - IdleSinceHint: t (read)
+    - IdleSinceHintMonotonic: t (read)
+    - BlockInhibited: s (read)
+    - DelayInhibited: s (read)
+    - InhibitDelayMaxUSec: t (read)
+    - HandlePowerKey: s (read)
+    - HandleSuspendKey: s (read)
+    - HandleHibernateKey: s (read)
+    - HandleLidSwitch: s (read)
+    - HandleLidSwitchExternalPower: s (read)
+    - HandleLidSwitchDocked: s (read)
+    - HoldoffTimeoutUSec: t (read)
+    - IdleAction: s (read)
+    - IdleActionUSec: t (read)
+    - PreparingForShutdown: b (read)
+    - PreparingForSleep: b (read)
+    - ScheduledShutdown: (st) (read)
+    - Docked: b (read)
+    - RemoveIPC: b (read)
+    - RuntimeDirectorySize: t (read)
+    - InhibitorsMax: t (read)
+    - NCurrentInhibitors: t (read)
+    - SessionsMax: t (read)
+    - NCurrentSessions: t (read)
+    - UserTasksMax: t (read)
+  Methods:
+    - GetSession(s) -> o
+    - GetSessionByPID(u) -> o
+    - GetUser(u) -> o
+    - GetUserByPID(u) -> o
+    - GetSeat(s) -> o
+    - ListSessions() -> a(susso)
+    - ListUsers() -> a(uso)
+    - ListSeats() -> a(so)
+    - ListInhibitors() -> a(ssssuu)
+    - CreateSession(u, u, s, s, s, s, s, u, s, s, b, s, s, a(sv)) -> s, o, s, h, u, s, u, b [privileged]
+    - ReleaseSession(s) [privileged]
+    - ActivateSession(s)
+    - ActivateSessionOnSeat(s, s)
+    - LockSession(s)
+    - UnlockSession(s)
+    - LockSessions()
+    - UnlockSessions()
+    - KillSession(s, s, i)
+    - KillUser(u, i)
+    - TerminateSession(s)
+    - TerminateUser(u)
+    - TerminateSeat(s)
+    - SetUserLinger(u, b, b)
+    - AttachDevice(s, s, b)
+    - FlushDevices(b)
+    - PowerOff(b)
+    - Reboot(b)
+    - Halt(b)
+    - Suspend(b)
+    - Hibernate(b)
+    - HybridSleep(b)
+    - CanPowerOff() -> s
+    - CanReboot() -> s
+    - CanHalt() -> s
+    - CanSuspend() -> s
+    - CanHibernate() -> s
+    - CanHybridSleep() -> s
+    - ScheduleShutdown(s, t)
+    - CancelScheduledShutdown() -> b
+    - Inhibit(s, s, s, s) -> h
+    - CanRebootToFirmwareSetup() -> s
+    - SetRebootToFirmwareSetup(b)
+    - SetWallMessage(s, b)
+  Signals:
+    - SessionNew(s, o)
+    - SessionRemoved(s, o)
+    - UserNew(u, o)
+    - UserRemoved(u, o)
+    - SeatNew(s, o)
+    - SeatRemoved(s, o)
+    - PrepareForShutdown(b)
+    - PrepareForSleep(b)
+
+Child nodes: /org/freedesktop/login1/user, /org/freedesktop/login1/session, /org/freedesktop/login1/seat
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 17/52: org.freedesktop.ohm
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+Child nodes: /com, /org, /ru
+
+--- Introspection at /org/freedesktop/ohm (dot-to-slash) ---
+(No introspection data available)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 18/52: org.freedesktop.ohm.mdm
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: No introspection data
+
+--- Introspection at /org/freedesktop/ohm/mdm (dot-to-slash) ---
+Error: No introspection data
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 19/52: org.freedesktop.systemd1
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces only, child: org)
+
+--- Introspection at /org/freedesktop/systemd1 (dot-to-slash) ---
+Path: /org/freedesktop/systemd1
+
+org.freedesktop.systemd1.Manager:
+  Properties:
+    - Version: s (read)
+    - Features: s (read)
+    - Virtualization: s (read)
+    - Architecture: s (read)
+    - SystemState: s (read)
+    - NNames: u (read)
+    - NJobs: u (read)
+    - Progress: d (read)
+    - Environment: as (read)
+    - LogLevel: s (readwrite, privileged)
+    - LogTarget: s (readwrite, privileged)
+    - RuntimeWatchdogUSec: t (readwrite, privileged)
+    - ShutdownWatchdogUSec: t (readwrite, privileged)
+    (many more properties...)
+  Methods:
+    - GetUnit(s) -> o
+    - GetUnitByPID(u) -> o
+    - LoadUnit(s) -> o
+    - StartUnit(s, s) -> o
+    - StopUnit(s, s) -> o
+    - RestartUnit(s, s) -> o
+    - ReloadUnit(s, s) -> o
+    - KillUnit(s, s, i)
+    - ListUnits() -> a(ssssssouso)
+    - ListJobs() -> a(usssoo)
+    - Reload()
+    - Reexecute()
+    - Exit() [privileged]
+    - Reboot() [privileged]
+    - PowerOff() [privileged]
+    - Halt() [privileged]
+    - KExec() [privileged]
+    - EnableUnitFiles(as, b, b) -> b, a(sss)
+    - DisableUnitFiles(as, b) -> a(sss)
+    - GetDefaultTarget() -> s
+    - SetDefaultTarget(s, b) -> a(sss)
+    (many more methods...)
+  Signals:
+    - UnitNew(s, o)
+    - UnitRemoved(s, o)
+    - JobNew(u, o, s)
+    - JobRemoved(u, o, s, s)
+    - StartupFinished(t, t, t, t, t, t)
+    - UnitFilesChanged()
+    - Reloading(b)
+
+Child nodes: /org/freedesktop/systemd1/job, /org/freedesktop/systemd1/unit
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 20/52: org.instance_unique_device_id
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+(No introspection data)
+
+--- Introspection at /org/instance_unique_device_id (dot-to-slash) ---
+(No introspection data)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 21/52: org.maemo.resource.manager
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+(No introspection data)
+
+--- Introspection at /org/maemo/resource/manager (dot-to-slash) ---
+(No introspection data)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 22/52: org.neard
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.ObjectManager:
+  Methods:
+    - GetManagedObjects() -> a{oa{sa{sv}}}
+  Signals:
+    - InterfacesAdded(o, a{sa{sv}})
+    - InterfacesRemoved(o, as)
+
+--- Introspection at /org/neard (dot-to-slash) ---
+(Uses ObjectManager for dynamic objects)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 23/52: org.nemomobile.MmsHandler
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.nemomobile.MmsHandler:
+  (MMS handling interface)
+
+--- Introspection at /org/nemomobile/MmsHandler (dot-to-slash) ---
+(Same as above)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 24/52: org.nemomobile.Route.Manager
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces, child: com)
+
+--- Introspection at /org/nemomobile/Route/Manager (dot-to-slash) ---
+(No introspection data)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 25/52: org.nemomobile.compositor
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: Access denied
+
+--- Introspection at /org/nemomobile/compositor (dot-to-slash) ---
+Error: Access denied
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 26/52: org.nemomobile.lipstick
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: Access denied
+
+--- Introspection at /org/nemomobile/lipstick (dot-to-slash) ---
+Error: Access denied
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 27/52: org.ofono
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.ofono.Manager:
+  Methods:
+    - GetModems() -> a(oa{sv}) modems
+  Signals:
+    - ModemAdded(o path, a{sv} properties)
+    - ModemRemoved(o path)
+
+org.nemomobile.ofono.ModemManager:
+  Methods:
+    - GetAll() -> i version, ao availableModems, ao enabledModems, s defaultDataSim, s defaultVoiceSim, s defaultDataModem, s defaultVoiceModem
+    - GetAll2() -> ... + ab presentSims
+    - GetAll3() -> ... + as imei
+    - GetAll4() -> ... + s mmsSim, s mmsModem
+    - GetAll5() -> ... + b ready
+    - GetAll6() -> ... + aa(si) modemErrors
+    - GetAll7() -> ... + as imeisv
+    - GetAll8() -> ... + a(si) errors
+    - GetInterfaceVersion() -> i
+    - GetAvailableModems() -> ao
+    - GetEnabledModems() -> ao
+    - GetPresentSims() -> ab
+    - GetIMEI() -> as
+    - GetIMEISV() -> as
+    - GetDefaultDataSim() -> s
+    - GetDefaultVoiceSim() -> s
+    - GetMmsSim() -> s
+    - GetDefaultDataModem() -> s
+    - GetDefaultVoiceModem() -> s
+    - GetMmsModem() -> s
+    - GetReady() -> b
+    - GetModemErrors() -> aa(si)
+    - GetErrors() -> a(si)
+    - SetEnabledModems(ao modems)
+    - SetDefaultDataSim(s imsi)
+    - SetDefaultVoiceSim(s imsi)
+    - SetMmsSim(s imsi) -> s mmsModem
+  Signals:
+    - EnabledModemsChanged(ao)
+    - PresentSimsChanged(i index, b present)
+    - DefaultDataSimChanged(s)
+    - DefaultVoiceSimChanged(s)
+    - DefaultDataModemChanged(s)
+    - DefaultVoiceModemChanged(s)
+    - MmsSimChanged(s)
+    - MmsModemChanged(s)
+    - ReadyChanged(b)
+    - ModemError(o path, s error_id, s message)
+
+Child nodes: /mdm, /ril_0, /ril_1 (modems)
+
+--- Introspection at /org/ofono (dot-to-slash) ---
+(Empty node)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 28/52: org.ofono.SmartMessagingAgent
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.nemomobile.MmsHandler:
+  (Same as org.nemomobile.MmsHandler)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 29/52: org.pacrunner
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces, child: org)
+
+--- Introspection at /org/pacrunner (dot-to-slash) ---
+(No additional data)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 30/52: org.sailfishos.fingerprint1
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.Properties:
+  (Standard Properties interface)
+
+--- Introspection at /org/sailfishos/fingerprint1 (dot-to-slash) ---
+(Fingerprint authentication service)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 31/52: org.sailfishos.mdmproxy
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: Access denied
+
+--- Introspection at /org/sailfishos/mdmproxy (dot-to-slash) ---
+Error: Access denied
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 32/52: org.sailfishos.nfc.daemon
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+org.freedesktop.DBus.ObjectManager:
+  Methods:
+    - GetManagedObjects() -> a{oa{sa{sv}}}
+  Signals:
+    - InterfacesAdded(o, a{sa{sv}})
+    - InterfacesRemoved(o, as)
+
+--- Introspection at /org/sailfishos/nfc/daemon (dot-to-slash) ---
+(Uses ObjectManager)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 33/52: org.sailfishos.nfc.settings
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Empty node)
+
+--- Introspection at /org/sailfishos/nfc/settings (dot-to-slash) ---
+(Empty node)
+
+--- Recursive child nodes ---
+
+Path: /nfc0
+org.sailfishos.nfc.Adapter:
+  Methods:
+    - GetAll() -> i version, b enabled, b powered, u supported_modes, u mode, b target_present, ao tags
+    - GetInterfaceVersion() -> i
+    - GetEnabled() -> b
+    - GetPowered() -> b
+    - GetSupportedModes() -> u
+    - GetMode() -> u
+    - GetTargetPresent() -> b
+    - GetTags() -> ao
+    - GetAll2() -> i version, b enabled, b powered, u supported_modes, u mode, b present, ao tags, ao peers
+    - GetPeers() -> ao
+  Signals:
+    - EnabledChanged(b enabled)
+    - PoweredChanged(b powered)
+    - ModeChanged(u mode)
+    - TargetPresentChanged(b target_present)
+    - TagsChanged(ao tags)
+    - PeersChanged(ao peers)
+
+org.neard.Adapter:
+  Properties:
+    - Mode: s (read)
+    - Powered: b (readwrite)
+    - Polling: b (read)
+    - Protocols: as (read)
+    - Enabled: b (read)
+  Methods:
+    - StartPollLoop(s name)
+    - StopPollLoop()
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 34/52: org.sailfishos.sailjaild1
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(App sandboxing service)
+
+--- Introspection at /org/sailfishos/sailjaild1 (dot-to-slash) ---
+(Same as above)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 35/52: org.sailfishos.system_nfc
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: Access denied
+
+--- Introspection at /org/sailfishos/system_nfc (dot-to-slash) ---
+Error: Access denied
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 36/52: ru.auroraos.HandsFreeManager
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces only)
+
+--- Introspection at /ru/auroraos/HandsFreeManager (dot-to-slash) ---
+(Bluetooth hands-free manager)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 37/52: ru.omp.APM
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces, child: ru)
+
+--- Introspection at /ru/omp/APM (dot-to-slash) ---
+Path: /ru/omp/APM
+
+ru.omp.APM:
+  Methods:
+    - GetPackage(s) -> a{ss}
+    - GetPackageList() -> aa{ss}
+    - Install(s, a{sv})
+    - Remove(s, a{sv})
+  Properties:
+    - None
+  Signals:
+    - PackageInstalled(a{ss})
+    - PackageRemoved(s)
+    - PackageUpgraded(a{ss})
+
+Child nodes: /ru/omp/APM/TrustedSources
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 38/52: ru.omp.AuthService
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces, child: ru)
+
+--- Introspection at /ru/omp/AuthService (dot-to-slash) ---
+Child nodes: /ru/omp/AuthService/Devlock
+
+--- Recursive child nodes ---
+
+Path: /ru/omp/AuthService/Devlock
+ru.omp.AuthService.Devlock:
+  Methods:
+    - GetState() -> i
+    - SetState(i state) -> b
+  Properties:
+    - None
+  Signals:
+    - StateChanged(i state)
+    - Notice(a{sv} data)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 39/52: ru.omp.Integrity
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Empty node, child: ru)
+
+--- Introspection at /ru/omp/Integrity (dot-to-slash) ---
+(File integrity verification service)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 40/52: ru.omp.LocationService
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Empty node, child: ru)
+
+--- Introspection at /ru/omp/LocationService (dot-to-slash) ---
+Path: /ru/omp/LocationService
+
+ru.omp.LocationService.CacheResetter:
+  Methods:
+    - Reset() -> b result
+
+ru.omp.LocationService.Conf:
+  Methods:
+    - AgnssProxyServerGetAll() -> b enabled, s address, i port, i update_interval, b tls, b verbose
+    - SetAgnssProxyServer(s address, i port)
+    - GetAgnssProxyServer() -> s address, i port
+    - SetAgnssProxyUpdateInterval(i update_interval)
+    - GetAgnssProxyUpdateInterval() -> i
+    - SetAgnssProxyEnabled(b enabled)
+    - GetAgnssProxyEnabled() -> b
+    - SetAgnssProxyTlsEnabled(b enabled)
+    - GetAgnssProxyTlsEnabled() -> b
+    - SetAgnssProxySslPinning(b enabled)
+    - SetAgnssProxySslPinningKey(s key)
+    - SetAgnssProxyVerbose(b verbose)
+    - GetAgnssProxyVerbose() -> b
+    - SetAgnssProxyReplaceImsiEnabled(b enabled)
+    - GetAgnssProxyReplaceImsiEnabled() -> b
+    - GetUserAgnssProxyConfAvailable() -> b
+    - ApplyUserAgnssProxyConf()
+    - AgnssUserConfGetAll() -> s address, i port, i update_interval, b tls
+  Signals:
+    - AgnssProxyConfChanged()
+    - AgnssProxyServerChanged(s address)
+    - AgnssProxyPortChanged(i port)
+    - AgnssProxyEnabledChanged(b enabled)
+    - AgnssProxyTlsChanged(b enabled)
+    - AgnssProxyVerboseChanged(b enabled)
+    - AgnssProxyUpdateIntervalChanged(i update_interval)
+    - AgnssProxyReplaceImsiChanged(b enabled)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 41/52: ru.omp.PolicyManager
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces, child: ru)
+
+--- Introspection at /ru/omp/PolicyManager (dot-to-slash) ---
+Path: /ru/omp/PolicyManager
+
+ru.omp.PolicyManager.Policy:
+  Methods:
+    - KeyValue(s key) -> v
+    - SetKeyValue(s key, v value) -> b
+  Properties:
+    - None
+  Signals:
+    - PolicyChanged(s key, v value)
+
+ru.omp.PolicyManager.Switch:
+  Methods:
+    - KeyValue(s key) -> v
+    - SetKeyValue(s key, v value) -> i
+    - KeyPolicyTypes(s key) -> ai
+    - Keys() -> as
+  Properties:
+    - None
+  Signals:
+    - SwitchChanged(s key, v value)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 42/52: ru.omp.RuntimeManager.Helper
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces only)
+
+--- Introspection at /ru/omp/RuntimeManager/Helper (dot-to-slash) ---
+(Runtime manager helper service)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 43/52: ru.omp.RuntimeManager.User
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces only)
+
+--- Introspection at /ru/omp/RuntimeManager/User (dot-to-slash) ---
+(Runtime manager user service)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 44/52: ru.omp.Securityd
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: Access denied
+
+--- Introspection at /ru/omp/Securityd (dot-to-slash) ---
+Error: Access denied
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 45/52: ru.omp.SystemUpdateManager
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces, child: ru)
+
+--- Introspection at /ru/omp/SystemUpdateManager (dot-to-slash) ---
+Path: /ru/omp/SystemUpdateManager
+
+ru.omp.SystemUpdateManager:
+  Properties:
+    - status: (i) (read)
+    - method: (i) (read)
+    - version: s (read)
+    - supportedMethods: a(i) (read)
+    - codeName: s (read)
+    - cover: s (read)
+    - summary: s (read)
+    - website: s (read)
+    - changelog: s (read)
+    - packagesToRemove: as (read)
+    - size: x (read)
+    - downloadedSize: x (read)
+    - isDownloaded: b (read)
+    - vendorDataUrl: s (read)
+    - isVendorDataDownloaded: b (read)
+    - lastChecked: x (read)
+    - activeScheduledAction: (i) (read)
+  Methods:
+    - Check(s version, b forceRefresh)
+    - SetMethod((i) method)
+    - GetOption(s name) -> v
+    - SetOption(s name, v value)
+    - Download()
+    - DownloadVersion(s desiredVersion)
+    - DownloadVendorData(s url)
+    - CancelDownload()
+    - ClearDownloadedData()
+    - Install(b reboot)
+    - RequestAvailableVersions()
+    - Schedule((i) action, s from, s to, (i) method, s version, s vendorDataUrl)
+    - CancelSchedule((i) action)
+    - GetSchedule((i) action) -> s
+  Signals:
+    - Error((i) error, s details)
+    - DownloadProgress(i progress)
+    - AvailableVersionsReady(a(si) availableVersions)
+    - OptionChanged(s name)
+    - Scheduled((i) action)
+    - statusChanged()
+    - methodChanged()
+    - versionChanged()
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 46/52: ru.omp.blacklistd
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+ru.omp.blacklistd:
+  Methods:
+    - CheckPhoneNumber(s imsi, s phoneNumber, i gsmAction) -> b result
+  Properties:
+    - None
+  Signals:
+    - None
+
+--- Introspection at /ru/omp/blacklistd (dot-to-slash) ---
+(Same as above)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 47/52: ru.omp.deviceinfo
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Standard interfaces only)
+
+Child nodes: /ru/omp/deviceinfo/Features, /ru/omp/deviceinfo/SIM, /ru/omp/deviceinfo/Storages
+
+--- Introspection at /ru/omp/deviceinfo (dot-to-slash) ---
+Child nodes: Features, SIM, Storages
+
+--- Recursive child nodes ---
+
+Path: /ru/omp/deviceinfo/SIM
+ru.omp.deviceinfo.SIM:
+  Methods:
+    - getSimCardsInfo() -> aa{sv}
+  Properties:
+    - None
+  Signals:
+    - simCardsEnabledChanged(aa{sv} updatedSimCards)
+    - preferredDataTransferSimChanged(aa{sv} updatedSimCards)
+    - preferredVoiceCallSimChanged(aa{sv} updatedSimCards)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 48/52: ru.omp.emm.userproxy
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: Access denied
+
+--- Introspection at /ru/omp/emm/userproxy (dot-to-slash) ---
+Error: Access denied
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 49/52: ru.omp.simwhitelist
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+ru.omp.simwhitelist:
+  Methods:
+    - isEnabled() -> b
+    - setEnabled(b enabled)
+    - removeIccid(s iccid)
+    - addIccid(s iccid)
+    - iccids() -> as
+    - blockedSims() -> as
+  Properties:
+    - None
+  Signals:
+    - EnabledChanged(b enabled)
+    - BlockedSimsChanged(as paths)
+    - availableSimsChanged()
+
+--- Introspection at /ru/omp/simwhitelist (dot-to-slash) ---
+(Same as above)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 50/52: ru.omprussia.PushDaemon
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Push notification daemon)
+
+--- Introspection at /ru/omprussia/PushDaemon (dot-to-slash) ---
+(Same as above)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 51/52: ru.omprussia.SystemLogs
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Error: Access denied
+
+--- Introspection at /ru/omprussia/SystemLogs (dot-to-slash) ---
+Error: Access denied
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICE 52/52: ru.omprussia.emm
+================================================================================
+Bus: system
+
+--- Introspection at / ---
+Path: /
+
+(Enterprise Mobility Management service)
+
+--- Introspection at /ru/omprussia/emm (dot-to-slash) ---
+(Same as above)
+
+--------------------------------------------------------------------------------
+
+================================================================================
+SERVICES WITH LIMITED ACCESS
+================================================================================
+- fi.w1.wpa_supplicant1 (Access denied - requires root)
+- org.nemomobile.compositor (Access denied)
+- org.nemomobile.lipstick (Access denied)
+- org.sailfishos.mdmproxy (Access denied)
+- org.sailfishos.system_nfc (Access denied)
+- ru.omp.Securityd (Access denied)
+- ru.omp.emm.userproxy (Access denied)
+- ru.omprussia.SystemLogs (Access denied)
+
+================================================================================
+SUMMARY
+================================================================================
+Total: 52 services
+With full introspection: 38
+Limited access: 8
+No introspection data: 6
+
+================================================================================
