@@ -1,6 +1,7 @@
 use crate::backends::{Bus, DBusBackend, DConfBackend, DConfValue, MessageItem};
 use crate::error::{AuroraError, Result};
 use serde::{Deserialize, Serialize};
+use std::cell::RefCell;
 
 const PROFILED_SERVICE: &str = "com.nokia.profiled";
 const PROFILED_PATH: &str = "/com/nokia/profiled";
@@ -54,8 +55,37 @@ pub struct SoundSettings {
     pub theme: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FontSettings {
+    pub family: String,
+    pub family_heading: String,
+    pub size_tiny: i32,
+    pub size_extra_small: i32,
+    pub size_small: i32,
+    pub size_medium: i32,
+    pub size_large: i32,
+    pub size_extra_large: i32,
+    pub size_huge: i32,
+}
+
+impl Default for FontSettings {
+    fn default() -> Self {
+        Self {
+            family: "ALS Hauss Variable".to_string(),
+            family_heading: "ALS Hauss Variable".to_string(),
+            size_tiny: 19,
+            size_extra_small: 22,
+            size_small: 25,
+            size_medium: 29,
+            size_large: 32,
+            size_extra_large: 40,
+            size_huge: 42,
+        }
+    }
+}
+
 pub struct SettingsService {
-    dconf: DConfBackend,
+    dconf: RefCell<DConfBackend>,
     dbus: DBusBackend,
 }
 
@@ -74,37 +104,37 @@ impl SettingsService {
     }
 
     pub fn with_backends(dbus: DBusBackend, dconf: DConfBackend) -> Self {
-        Self { dconf, dbus }
+        Self {
+            dconf: RefCell::new(dconf),
+            dbus,
+        }
     }
 
     pub fn get_theme(&self) -> Result<ThemeSettings> {
-        let active_ambience = self
-            .dconf
+        let mut dconf = self.dconf.borrow_mut();
+
+        let active_ambience = dconf
             .get("/desktop/jolla/theme", "active_ambience")?
             .as_string()
             .ok();
 
-        let color_scheme = self
-            .dconf
+        let color_scheme = dconf
             .get("/desktop/jolla/theme", "color_scheme")?
             .as_int()
             .ok()
             .map(|i| i as u32);
 
-        let highlight_color = self
-            .dconf
+        let highlight_color = dconf
             .get("/desktop/jolla/theme/color", "highlight")?
             .as_string()
             .ok();
 
-        let primary_color = self
-            .dconf
+        let primary_color = dconf
             .get("/desktop/jolla/theme/color", "primary")?
             .as_string()
             .ok();
 
-        let secondary_color = self
-            .dconf
+        let secondary_color = dconf
             .get("/desktop/jolla/theme/color", "secondary")?
             .as_string()
             .ok();
@@ -118,60 +148,9 @@ impl SettingsService {
         })
     }
 
-    pub fn set_theme(&self, theme: &ThemeSettings) -> Result<()> {
-        if let Some(ref ambience) = theme.active_ambience {
-            self.dconf.set(
-                "/desktop/jolla/theme",
-                "active_ambience",
-                &DConfValue::String(ambience.clone()),
-            )?;
-        }
-
-        if let Some(scheme) = theme.color_scheme {
-            self.dconf.set(
-                "/desktop/jolla/theme",
-                "color_scheme",
-                &DConfValue::Int(scheme as i32),
-            )?;
-        }
-
-        if let Some(ref color) = theme.highlight_color {
-            self.dconf.set(
-                "/desktop/jolla/theme/color",
-                "highlight",
-                &DConfValue::String(color.clone()),
-            )?;
-        }
-
-        if let Some(ref color) = theme.primary_color {
-            self.dconf.set(
-                "/desktop/jolla/theme/color",
-                "primary",
-                &DConfValue::String(color.clone()),
-            )?;
-        }
-
-        if let Some(ref color) = theme.secondary_color {
-            self.dconf.set(
-                "/desktop/jolla/theme/color",
-                "secondary",
-                &DConfValue::String(color.clone()),
-            )?;
-        }
-
-        Ok(())
-    }
-
-    pub fn set_wallpaper(&self, path: &str) -> Result<()> {
-        self.dconf.set(
-            "/desktop/jolla/background/portrait",
-            "home_picture_filename",
-            &DConfValue::String(path.to_string()),
-        )
-    }
-
     pub fn get_wallpaper(&self) -> Result<Option<String>> {
         self.dconf
+            .borrow_mut()
             .get(
                 "/desktop/jolla/background/portrait",
                 "home_picture_filename",
@@ -183,15 +162,15 @@ impl SettingsService {
     }
 
     pub fn get_display(&self) -> Result<DisplaySettings> {
-        let orientation_lock = self
-            .dconf
+        let mut dconf = self.dconf.borrow_mut();
+
+        let orientation_lock = dconf
             .get("/lipstick", "orientationLock")?
             .as_string()
             .ok()
             .and_then(|s| Orientation::parse(&s));
 
-        let brightness = self
-            .dconf
+        let brightness = dconf
             .get("/desktop/jolla/display", "brightness")?
             .as_int()
             .ok()
@@ -201,22 +180,6 @@ impl SettingsService {
             orientation_lock,
             brightness,
         })
-    }
-
-    pub fn set_orientation_lock(&self, orientation: Orientation) -> Result<()> {
-        self.dconf.set(
-            "/lipstick",
-            "orientationLock",
-            &DConfValue::String(orientation.as_str().to_string()),
-        )
-    }
-
-    pub fn set_brightness(&self, brightness: u32) -> Result<()> {
-        self.dconf.set(
-            "/desktop/jolla/display",
-            "brightness",
-            &DConfValue::Int(brightness as i32),
-        )
     }
 
     pub fn get_sound_profile(&self) -> Result<String> {
@@ -290,28 +253,78 @@ impl SettingsService {
 
     pub fn get_sound_settings(&self) -> Result<SoundSettings> {
         let profile = self.get_sound_profile().ok();
-        let theme = self.dconf.get("/jolla/sound", "theme")?.as_string().ok();
+        let theme = self
+            .dconf
+            .borrow_mut()
+            .get("/jolla/sound", "theme")?
+            .as_string()
+            .ok();
 
         Ok(SoundSettings { profile, theme })
     }
 
     pub fn get_all(&self, path: &str) -> Result<Vec<(String, DConfValue)>> {
-        self.dconf.get_all(path)
-    }
-
-    pub fn reset_key(&self, path: &str, key: &str) -> Result<()> {
-        self.dconf.reset(path, key)
+        self.dconf.borrow_mut().get_all(path)
     }
 
     pub fn get_pixel_ratio(&self) -> Result<f64> {
         self.dconf
+            .borrow_mut()
             .get("/desktop/sailfish/silica", "theme_pixel_ratio")?
             .as_double()
     }
 
     pub fn get_statusbar_height(&self) -> Result<i32> {
         self.dconf
+            .borrow_mut()
             .get("/desktop/sailfish/silica/statusbar", "height")?
             .as_int()
+    }
+
+    pub fn get_font_settings(&self) -> Result<FontSettings> {
+        let mut dconf = self.dconf.borrow_mut();
+        let path = "/desktop/sailfish/silica";
+
+        let family = dconf
+            .get(path, "font_family")?
+            .as_string()
+            .unwrap_or_else(|_| "ALS Hauss Variable".to_string());
+
+        let family_heading = dconf
+            .get(path, "font_family_heading")?
+            .as_string()
+            .unwrap_or_else(|_| "ALS Hauss Variable".to_string());
+
+        let size_tiny = dconf.get(path, "font_size_tiny")?.as_int().unwrap_or(19);
+
+        let size_extra_small = dconf
+            .get(path, "font_size_extra_small")?
+            .as_int()
+            .unwrap_or(22);
+
+        let size_small = dconf.get(path, "font_size_small")?.as_int().unwrap_or(25);
+
+        let size_medium = dconf.get(path, "font_size_medium")?.as_int().unwrap_or(29);
+
+        let size_large = dconf.get(path, "font_size_large")?.as_int().unwrap_or(32);
+
+        let size_extra_large = dconf
+            .get(path, "font_size_extra_large")?
+            .as_int()
+            .unwrap_or(40);
+
+        let size_huge = dconf.get(path, "font_size_huge")?.as_int().unwrap_or(42);
+
+        Ok(FontSettings {
+            family,
+            family_heading,
+            size_tiny,
+            size_extra_small,
+            size_small,
+            size_medium,
+            size_large,
+            size_extra_large,
+            size_huge,
+        })
     }
 }

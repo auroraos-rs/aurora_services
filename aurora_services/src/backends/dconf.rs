@@ -1,7 +1,10 @@
 use crate::error::{AuroraError, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::process::Command;
+use std::fs;
+use std::path::Path;
+
+const DCONF_DB_PATH: &str = "/etc/dconf/db";
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
@@ -105,81 +108,129 @@ impl DConfValue {
     }
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct DConfBackend {}
+pub struct DConfBackend {
+    cache: HashMap<String, HashMap<String, DConfValue>>,
+}
+
+impl Default for DConfBackend {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl DConfBackend {
     pub fn new() -> Self {
-        Self {}
-    }
-
-    pub fn get(&self, path: &str, key: &str) -> Result<DConfValue> {
-        let full_path = format!("{}/{}", path.trim_end_matches('/'), key);
-        let output = Command::new("dconf")
-            .arg("read")
-            .arg(&full_path)
-            .output()
-            .map_err(|e| AuroraError::CommandFailed(e.to_string()))?;
-
-        let value_str = String::from_utf8_lossy(&output.stdout).trim().to_string();
-
-        if value_str.is_empty() {
-            return Ok(DConfValue::Null);
-        }
-
-        parse_dconf_value(&value_str)
-    }
-
-    pub fn set(&self, path: &str, key: &str, value: &DConfValue) -> Result<()> {
-        let full_path = format!("{}/{}", path.trim_end_matches('/'), key);
-        let value_str = value_to_dconf_string(value);
-
-        let status = Command::new("dconf")
-            .arg("write")
-            .arg(&full_path)
-            .arg(&value_str)
-            .status()
-            .map_err(|e| AuroraError::CommandFailed(e.to_string()))?;
-
-        if status.success() {
-            Ok(())
-        } else {
-            Err(AuroraError::CommandFailed(format!(
-                "dconf write failed with status: {}",
-                status
-            )))
+        Self {
+            cache: HashMap::new(),
         }
     }
 
-    pub fn get_all(&self, path: &str) -> Result<Vec<(String, DConfValue)>> {
-        let output = Command::new("dconf")
-            .arg("dump")
-            .arg(path)
-            .output()
-            .map_err(|e| AuroraError::CommandFailed(e.to_string()))?;
+    pub fn get(&mut self, path: &str, key: &str) -> Result<DConfValue> {
+        let normalized_path = normalize_path(path);
 
-        let content = String::from_utf8_lossy(&output.stdout);
-        parse_dconf_dump(&content)
+        if !self.cache.contains_key(&normalized_path) {
+            let values = self.read_path_from_files(&normalized_path)?;
+            self.cache.insert(normalized_path.clone(), values);
+        }
+
+        Ok(self
+            .cache
+            .get(&normalized_path)
+            .and_then(|section| section.get(key).cloned())
+            .unwrap_or(DConfValue::Null))
     }
 
-    pub fn reset(&self, path: &str, key: &str) -> Result<()> {
-        let full_path = format!("{}/{}", path.trim_end_matches('/'), key);
+    pub fn get_all(&mut self, path: &str) -> Result<Vec<(String, DConfValue)>> {
+        let normalized_path = normalize_path(path);
 
-        let status = Command::new("dconf")
-            .arg("reset")
-            .arg(&full_path)
-            .status()
-            .map_err(|e| AuroraError::CommandFailed(e.to_string()))?;
+        if !self.cache.contains_key(&normalized_path) {
+            let values = self.read_path_from_files(&normalized_path)?;
+            self.cache.insert(normalized_path.clone(), values);
+        }
 
-        if status.success() {
-            Ok(())
-        } else {
-            Err(AuroraError::CommandFailed(format!(
-                "dconf reset failed with status: {}",
-                status
-            )))
+        Ok(self
+            .cache
+            .get(&normalized_path)
+            .map(|m| m.iter().map(|(k, v)| (k.clone(), v.clone())).collect())
+            .unwrap_or_default())
+    }
+
+    fn read_path_from_files(&self, target_path: &str) -> Result<HashMap<String, DConfValue>> {
+        let mut result = HashMap::new();
+
+        let db_path = Path::new(DCONF_DB_PATH);
+
+        for db_name in &["vendor", "vendor-variant", "nemo"] {
+            let dir = db_path.join(format!("{}.d", db_name));
+            if dir.exists() {
+                self.read_dconf_dir(&dir, target_path, &mut result)?;
+            }
+        }
+
+        Ok(result)
+    }
+
+    fn read_dconf_dir(
+        &self,
+        dir: &Path,
+        target_path: &str,
+        result: &mut HashMap<String, DConfValue>,
+    ) -> Result<()> {
+        let entries = fs::read_dir(dir).map_err(|e| {
+            AuroraError::DConf(format!("Failed to read dir {}: {}", dir.display(), e))
+        })?;
+
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path.extension().map(|e| e == "txt").unwrap_or(false) {
+                if let Ok(content) = fs::read_to_string(&path) {
+                    self.parse_dconf_file(&content, target_path, result);
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn parse_dconf_file(
+        &self,
+        content: &str,
+        target_path: &str,
+        result: &mut HashMap<String, DConfValue>,
+    ) {
+        let mut current_section: Option<String> = None;
+
+        for line in content.lines() {
+            let line = line.trim();
+
+            if line.is_empty() || line.starts_with('#') {
+                continue;
+            }
+
+            if line.starts_with('[') && line.ends_with(']') {
+                let section = &line[1..line.len() - 1];
+                current_section = Some(normalize_path(section));
+                continue;
+            }
+
+            if let Some(ref section) = &current_section {
+                if section == target_path {
+                    if let Some((key, value)) = line.split_once('=') {
+                        let key = key.trim().to_string();
+                        let value = value.trim();
+
+                        if let Ok(parsed_value) = parse_dconf_value(value) {
+                            result.insert(key, parsed_value);
+                        }
+                    }
+                }
+            }
         }
     }
+}
+
+fn normalize_path(path: &str) -> String {
+    path.trim_matches('/').trim_start_matches('/').to_string()
 }
 
 fn parse_dconf_value(s: &str) -> Result<DConfValue> {
@@ -360,53 +411,4 @@ fn parse_dconf_dict(s: &str) -> Result<DConfValue> {
     }
 
     Ok(DConfValue::Dict(result))
-}
-
-fn parse_dconf_dump(content: &str) -> Result<Vec<(String, DConfValue)>> {
-    let mut result = Vec::new();
-
-    for line in content.lines() {
-        let line = line.trim();
-        if line.is_empty() || line.starts_with('#') || line.starts_with('[') {
-            continue;
-        }
-
-        if let Some((key, value)) = line.split_once('=') {
-            let key = key.trim().to_string();
-            let value = parse_dconf_value(value.trim())?;
-            result.push((key, value));
-        }
-    }
-
-    Ok(result)
-}
-
-fn value_to_dconf_string(value: &DConfValue) -> String {
-    match value {
-        DConfValue::String(s) => format!("'{}'", escape_string(s)),
-        DConfValue::Int(i) => i.to_string(),
-        DConfValue::Int64(i) => i.to_string(),
-        DConfValue::Double(d) => d.to_string(),
-        DConfValue::Bool(b) => b.to_string(),
-        DConfValue::Array(arr) => {
-            let items: Vec<String> = arr.iter().map(value_to_dconf_string).collect();
-            format!("[{}]", items.join(", "))
-        }
-        DConfValue::Dict(dict) => {
-            let items: Vec<String> = dict
-                .iter()
-                .map(|(k, v)| format!("'{}': {}", escape_string(k), value_to_dconf_string(v)))
-                .collect();
-            format!("{{{}}}", items.join(", "))
-        }
-        DConfValue::Null => "@mv".to_string(),
-    }
-}
-
-fn escape_string(s: &str) -> String {
-    s.replace('\\', "\\\\")
-        .replace('\'', "\\'")
-        .replace('\"', "\\\"")
-        .replace('\n', "\\n")
-        .replace('\t', "\\t")
 }

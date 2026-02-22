@@ -35,7 +35,6 @@ struct MyApp {
     notification: NotificationState,
     settings: SettingsState,
     status: String,
-    use_system_background: bool,
     statusbar_height: f32,
 }
 
@@ -45,8 +44,7 @@ impl MyApp {
             active_tab: Tab::default(),
             notification: NotificationState::default(),
             settings: SettingsState::default(),
-            status: String::new(),
-            use_system_background: false,
+            status: format!("Status bar height: {}", statusbar_height),
             statusbar_height,
         }
     }
@@ -87,26 +85,16 @@ impl eframe::App for MyApp {
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        let mut top_panel = egui::TopBottomPanel::top("top_bar")
+        let top_panel = egui::TopBottomPanel::top("top_bar")
             .exact_height(self.statusbar_height)
             .show_separator_line(false);
 
-        let mut central_panel = egui::CentralPanel::default();
-
-        if self.use_system_background {
-            let frame = egui::Frame::default().fill(Color32::TRANSPARENT);
-            top_panel = top_panel.frame(frame);
-            let frame = egui::Frame::default()
-                .inner_margin(12.)
-                .fill(Color32::TRANSPARENT);
-            central_panel = central_panel.frame(frame);
-        }
+        let central_panel = egui::CentralPanel::default();
 
         top_panel.show(ctx, |_ui| {});
 
         central_panel.show(ctx, |ui| {
             ui.spacing_mut().item_spacing = egui::Vec2::new(10., 10.);
-            ui.label(format!("Top Bar Height: {}", self.statusbar_height));
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.active_tab, Tab::Notifications, "Notifications");
                 ui.selectable_value(&mut self.active_tab, Tab::Theme, "Theme");
@@ -241,7 +229,7 @@ impl MyApp {
     }
 
     fn show_theme(&mut self, ui: &mut egui::Ui) {
-        ui.heading(RichText::new("Theme Settings").size(24.0));
+        ui.heading(RichText::new("Theme Settings (Read-only)").size(24.0));
 
         if !self.settings.loaded {
             if ui.button("Load Theme").clicked() {
@@ -251,40 +239,42 @@ impl MyApp {
             ui.horizontal(|ui| {
                 ui.label("Active Ambience:");
                 if let Some(ref ambience) = self.settings.theme.active_ambience {
-                    let mut s = ambience.clone();
-                    ui.text_edit_singleline(&mut s);
-                    self.settings.theme.active_ambience = Some(s);
-                } else {
-                    let mut s = String::new();
-                    ui.text_edit_singleline(&mut s);
-                    if !s.is_empty() {
-                        self.settings.theme.active_ambience = Some(s);
-                    }
+                    ui.label(ambience);
                 }
             });
 
             ui.horizontal(|ui| {
                 ui.label("Color Scheme:");
                 if let Some(scheme) = self.settings.theme.color_scheme {
-                    let mut s = scheme;
-                    ui.add(egui::DragValue::new(&mut s));
-                    self.settings.theme.color_scheme = Some(s);
+                    ui.label(scheme.to_string());
                 }
             });
 
             ui.horizontal(|ui| {
                 ui.label("Highlight Color:");
                 if let Some(ref color) = self.settings.theme.highlight_color {
-                    let mut s = color.clone();
-                    ui.text_edit_singleline(&mut s);
-                    self.settings.theme.highlight_color = Some(s);
+                    ui.label(color);
+                }
+            });
+
+            ui.horizontal(|ui| {
+                ui.label("Primary Color:");
+                if let Some(ref color) = self.settings.theme.primary_color {
+                    ui.label(color);
+                }
+            });
+
+            ui.horizontal(|ui| {
+                ui.label("Secondary Color:");
+                if let Some(ref color) = self.settings.theme.secondary_color {
+                    ui.label(color);
                 }
             });
 
             ui.add_space(10.0);
 
-            if ui.button("Save Theme").clicked() {
-                self.save_theme();
+            if ui.button("Reload Theme").clicked() {
+                self.load_theme();
             }
         }
     }
@@ -307,97 +297,23 @@ impl MyApp {
         }
     }
 
-    fn save_theme(&mut self) {
-        match SettingsService::new() {
-            Ok(service) => match service.set_theme(&self.settings.theme) {
-                Ok(()) => {
-                    self.status = "Theme saved".to_string();
-                }
-                Err(e) => {
-                    self.status = format!("Error: {}", e);
-                }
-            },
-            Err(e) => {
-                self.status = format!("Failed to create service: {}", e);
-            }
-        }
-    }
-
     fn show_display(&mut self, ui: &mut egui::Ui) {
-        ui.heading(RichText::new("Display Settings").size(24.0));
+        ui.heading(RichText::new("Display Settings (Read-only)").size(24.0));
 
         ui.horizontal(|ui| {
-            ui.label("Orientation:");
-            egui::ComboBox::from_label("")
-                .selected_text(format!("{:?}", self.settings.orientation))
-                .show_ui(ui, |ui| {
-                    ui.selectable_value(
-                        &mut self.settings.orientation,
-                        Orientation::Portrait,
-                        "Portrait",
-                    );
-                    ui.selectable_value(
-                        &mut self.settings.orientation,
-                        Orientation::Landscape,
-                        "Landscape",
-                    );
-                    ui.selectable_value(
-                        &mut self.settings.orientation,
-                        Orientation::Dynamic,
-                        "Dynamic",
-                    );
-                });
+            ui.label("Orientation Lock:");
+            ui.label(format!("{:?}", self.settings.orientation));
         });
 
         ui.horizontal(|ui| {
             ui.label("Brightness:");
-            ui.add(egui::Slider::new(&mut self.settings.brightness, 1..=100));
+            ui.label(self.settings.brightness.to_string());
         });
 
         ui.add_space(10.0);
 
-        if ui.button("Set Orientation").clicked() {
-            self.set_orientation();
-        }
-
-        if ui.button("Set Brightness").clicked() {
-            self.set_brightness();
-        }
-
         if ui.button("Load Display Settings").clicked() {
             self.load_display();
-        }
-    }
-
-    fn set_orientation(&mut self) {
-        match SettingsService::new() {
-            Ok(service) => match service.set_orientation_lock(self.settings.orientation) {
-                Ok(()) => {
-                    self.status = "Orientation set".to_string();
-                }
-                Err(e) => {
-                    self.status = format!("Error: {}", e);
-                }
-            },
-            Err(e) => {
-                self.status = format!("Failed to create service: {}", e);
-            }
-        }
-    }
-
-    fn set_brightness(&mut self) {
-        match SettingsService::new() {
-            Ok(service) => match service.set_brightness(self.settings.brightness) {
-                Ok(()) => {
-                    self.status = "Brightness set".to_string();
-                }
-                Err(e) => {
-                    self.status = format!("Error: {}", e);
-                }
-            },
-            Err(e) => {
-                self.status = format!("Failed to create service: {}", e);
-            }
         }
     }
 
@@ -427,21 +343,17 @@ impl MyApp {
         ui.heading(RichText::new("Sound Settings").size(24.0));
 
         ui.horizontal(|ui| {
-            ui.label("Profile:");
-            ui.text_edit_singleline(&mut self.settings.sound_profile);
+            ui.label("Current Profile:");
+            ui.label(&self.settings.sound_profile);
         });
 
         ui.add_space(10.0);
 
-        if ui.button("Get Profile").clicked() {
+        if ui.button("Get Current Profile").clicked() {
             self.get_sound_profile();
         }
 
-        if ui.button("Set Profile").clicked() {
-            self.set_sound_profile();
-        }
-
-        if ui.button("Get Profiles").clicked() {
+        if ui.button("Get Available Profiles").clicked() {
             self.get_sound_profiles();
         }
 
@@ -462,22 +374,6 @@ impl MyApp {
                 Ok(profile) => {
                     self.settings.sound_profile = profile;
                     self.status = "Profile loaded".to_string();
-                }
-                Err(e) => {
-                    self.status = format!("Error: {}", e);
-                }
-            },
-            Err(e) => {
-                self.status = format!("Failed to create service: {}", e);
-            }
-        }
-    }
-
-    fn set_sound_profile(&mut self) {
-        match SettingsService::new() {
-            Ok(service) => match service.set_sound_profile(&self.settings.sound_profile) {
-                Ok(()) => {
-                    self.status = "Profile set".to_string();
                 }
                 Err(e) => {
                     self.status = format!("Error: {}", e);
