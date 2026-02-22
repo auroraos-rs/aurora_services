@@ -29,18 +29,21 @@
 - [x] Спроектировать API для работы с DBus
 
 ### 4. Реализация
-- [ ] Реализовать `error.rs` — типы ошибок
-- [ ] Реализовать `backends/dbus.rs` — DBus backend
-- [ ] Реализовать `backends/dconf.rs` — DConf backend
-- [ ] Реализовать `services/notifications.rs` — сервис уведомлений
-- [ ] Реализовать `services/settings.rs` — сервис настроек
-- [ ] Добавить тесты
+- [x] Реализовать `error.rs` — типы ошибок
+- [x] Реализовать `backends/dbus.rs` — DBus backend
+- [x] Реализовать `backends/dconf.rs` — DConf backend
+- [x] Реализовать `services/notifications.rs` — сервис уведомлений
+- [x] Реализовать `services/settings.rs` — сервис настроек
 
-### 5. Документация
+### 5. Тестирование
+- [x] Создать демо-приложение `aurora_services_demo` (egui GUI)
+- [ ] Протестировать на реальном устройстве Aurora OS
+
+### 6. Документация
 - [ ] Описать использование библиотеки (rustdoc)
 - [ ] Привести примеры кода
 
-### 6. Дополнительные сервисы (будущее)
+### 7. Дополнительные сервисы (будущее)
 - [ ] BluetoothService (org.bluez)
 - [ ] UsbService (com.meego.usb_moded)
 - [ ] SensorService (com.nokia.SensorService)
@@ -49,6 +52,35 @@
 
 ---
 
+## Структура проекта
+
+```
+aurora_services/
+├── Cargo.toml          # Workspace root
+├── Cross.toml          # Cross-compilation config
+├── aarch64_build.sh    # Build script for aarch64
+├── arm_build.sh        # Build script for armv7
+├── aurora_services/    # Library
+│   ├── Cargo.toml
+│   └── src/
+│       ├── lib.rs
+│       ├── error.rs
+│       ├── backends/
+│       │   ├── mod.rs
+│       │   ├── dbus.rs
+│       │   └── dconf.rs
+│       └── services/
+│           ├── mod.rs
+│           ├── notifications.rs
+│           └── settings.rs
+└── aurora_services_demo/  # GUI demo app
+    ├── Cargo.toml
+    ├── src/main.rs
+    └── rpm/
+```
+
+---
+
 ## Дата начала: 2026-02-21
 
-## Статус: Этап 4 — Реализация
+## Статус: Этап 5 — Тестирование на устройстве

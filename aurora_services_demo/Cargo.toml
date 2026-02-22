@@ -1,0 +1,29 @@
+[package]
+name = "aurora_services_demo"
+version = "0.1.0"
+edition = "2024"
+description = "Demo application for aurora_services library"
+authors = ["aurora_services"]
+license = "MIT"
+
+[dependencies]
+aurora_services = { path = "../aurora_services" }
+eframe = { version = "0.33", default-features = false, features = [
+    "glow",
+    "default_fonts",
+    "wayland",
+    "accesskit",
+] }
+
+[package.metadata.generate-rpm]
+name = "com.example.aurora_services_demo"
+summary = "Aurora Services Demo"
+release = "1"
+assets = [
+    { source = "target/release/aurora_services_demo", dest = "/usr/bin/com.example.aurora_services_demo", mode = "755" },
+    { source = "rpm/com.example.aurora_services_demo.desktop", dest = "/usr/share/applications/com.example.aurora_services_demo.desktop", mode = "644" },
+    { source = "rpm/icons/86x86/com.example.aurora_services_demo.png", dest = "/usr/share/icons/hicolor/86x86/apps/com.example.aurora_services_demo.png", mode = "644" },
+    { source = "rpm/icons/108x108/com.example.aurora_services_demo.png", dest = "/usr/share/icons/hicolor/108x108/apps/com.example.aurora_services_demo.png", mode = "644" },
+    { source = "rpm/icons/128x128/com.example.aurora_services_demo.png", dest = "/usr/share/icons/hicolor/128x128/apps/com.example.aurora_services_demo.png", mode = "644" },
+    { source = "rpm/icons/172x172/com.example.aurora_services_demo.png", dest = "/usr/share/icons/hicolor/172x172/apps/com.example.aurora_services_demo.png", mode = "644" },
+]
