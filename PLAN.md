@@ -31,13 +31,15 @@
 ### 4. Реализация
 - [x] Реализовать `error.rs` — типы ошибок
 - [x] Реализовать `backends/dbus.rs` — DBus backend
-- [x] Реализовать `backends/dconf.rs` — DConf backend
+- [x] Реализовать `backends/dconf.rs` — DConf backend (чтение из txt файлов)
 - [x] Реализовать `services/notifications.rs` — сервис уведомлений
 - [x] Реализовать `services/settings.rs` — сервис настроек
+- [x] Добавить `FontSettings` для настроек шрифтов
 
 ### 5. Тестирование
 - [x] Создать демо-приложение `aurora_services_demo` (egui GUI)
-- [ ] Протестировать на реальном устройстве Aurora OS
+- [x] Notifications работают на устройстве
+- [ ] Протестировать DConf чтение из песочницы
 
 ### 6. Документация
 - [ ] Описать использование библиотеки (rustdoc)
