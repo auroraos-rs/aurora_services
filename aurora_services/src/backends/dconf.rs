@@ -546,4 +546,84 @@ auto_scale_values=true
         let result = backend.get("/nonexistent/path", "key").unwrap();
         assert!(matches!(result, DConfValue::Null));
     }
+
+    #[test]
+    fn test_parse_real_dconf_dump() {
+        let content = include_str!("../../../dconf_dump.txt");
+        let backend = DConfBackend::new();
+        let mut cache: HashMap<String, DConfValue> = HashMap::new();
+
+        backend.parse_dconf_file(content, "desktop/sailfish/silica", &mut cache);
+
+        assert_eq!(
+            cache.get("theme_pixel_ratio").unwrap().as_double().unwrap(),
+            1.25
+        );
+        assert_eq!(
+            cache.get("font_family").unwrap().as_string().unwrap(),
+            "ALS Hauss Variable"
+        );
+        assert_eq!(
+            cache
+                .get("font_family_heading")
+                .unwrap()
+                .as_string()
+                .unwrap(),
+            "ALS Hauss Variable"
+        );
+        assert_eq!(cache.get("font_size_medium").unwrap().as_int().unwrap(), 29);
+        assert_eq!(cache.get("font_size_tiny").unwrap().as_int().unwrap(), 19);
+        assert_eq!(cache.get("font_size_huge").unwrap().as_int().unwrap(), 42);
+        assert!(cache.get("auto_scale_values").unwrap().as_bool().unwrap());
+        assert_eq!(
+            cache.get("theme_icon_subdir").unwrap().as_string().unwrap(),
+            "z1.25"
+        );
+        assert_eq!(
+            cache.get("tab_bar_style").unwrap().as_string().unwrap(),
+            "aurora"
+        );
+    }
+
+    #[test]
+    fn test_parse_dconf_dump_lipstick() {
+        let content = include_str!("../../../dconf_dump.txt");
+        let backend = DConfBackend::new();
+        let mut cache: HashMap<String, DConfValue> = HashMap::new();
+
+        backend.parse_dconf_file(content, "lipstick", &mut cache);
+
+        assert_eq!(
+            cache.get("orientationLock").unwrap().as_string().unwrap(),
+            "portrait"
+        );
+    }
+
+    #[test]
+    fn test_parse_dconf_dump_with_arrays() {
+        let content = include_str!("../../../dconf_dump.txt");
+        let backend = DConfBackend::new();
+        let mut cache: HashMap<String, DConfValue> = HashMap::new();
+
+        backend.parse_dconf_file(content, "apps/jolla-camera/primary/image", &mut cache);
+
+        let exposure_values = cache
+            .get("exposureCompensationValues")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(exposure_values.len(), 5);
+        assert_eq!(exposure_values[0].as_int().unwrap(), 4);
+        assert_eq!(exposure_values[4].as_int().unwrap(), -4);
+
+        let viewfinder_values = cache
+            .get("viewfinderGridValues")
+            .unwrap()
+            .as_array()
+            .unwrap();
+        assert_eq!(viewfinder_values.len(), 3);
+        assert_eq!(viewfinder_values[0].as_string().unwrap(), "none");
+        assert_eq!(viewfinder_values[1].as_string().unwrap(), "thirds");
+        assert_eq!(viewfinder_values[2].as_string().unwrap(), "ambience");
+    }
 }
