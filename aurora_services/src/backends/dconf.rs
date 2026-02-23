@@ -182,9 +182,15 @@ impl DConfBackend {
 
         for entry in entries.flatten() {
             let path = entry.path();
+            if path.is_dir() {
+                self.read_dconf_dir(&path, target_path, result)?;
+            }
             if path.extension().map(|e| e == "txt").unwrap_or(false) {
                 if let Ok(content) = fs::read_to_string(&path) {
                     self.parse_dconf_file(&content, target_path, result);
+                } else {
+                    // Handle error when reading file content
+                    eprintln!("Failed to read file content: {}", path.display());
                 }
             }
         }

@@ -11,11 +11,11 @@ CURRENT_DIR="$(pwd)";
 TARGET=aarch64-unknown-linux-gnu
 
 aurora_psdk="$PSDK_DIR/sdk-chroot"
-PKG_VERSION="$(cargo pkgid | cut -d \# -f 2)"
+PKG_VERSION="$(cargo pkgid --manifest-path aurora_services_demo/Cargo.toml | cut -d \# -f 2)"
 
 mkdir -p RPMS/
 
 cross build -p aurora_services_demo --release --target $TARGET
-cargo generate-rpm -a aarch64 --target $TARGET -o RPMS/
+cargo generate-rpm -p aurora_services_demo -a aarch64 --target $TARGET -o RPMS/
 
-$aurora_psdk rpmsign-external sign -k $PSDK_DIR/../../certs/regular_key.pem -c $PSDK_DIR/../../certs/regular_cert.pem "$CURRENT_DIR/RPMS/com.example.aurora_services_demo-$PKG_VERSION-1.aarch64.rpm"
+$aurora_psdk rpmsign-external sign -k $PSDK_DIR/../../certs/lmaxyz_key.pem -c $PSDK_DIR/../../certs/lmaxyz_cert.pem "$CURRENT_DIR/RPMS/com.example.aurora_services_demo-$PKG_VERSION-1.aarch64.rpm"

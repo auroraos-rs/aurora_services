@@ -1,33 +1,5 @@
-use aurora_services::{
-    NotificationBuilder, NotificationService, Orientation, SettingsService, ThemeSettings,
-};
+use aurora_services::{NotificationBuilder, NotificationService, SettingsService};
 use eframe::egui::{self, Color32, RichText, ThemePreference};
-use std::fs;
-
-fn check_dconf_access() -> String {
-    let mut results = Vec::new();
-
-    let paths = [
-        "/etc/dconf/db/vendor.d",
-        "/etc/dconf/db/vendor-variant.d",
-        "/etc/dconf/db/nemo.d",
-        "/etc/dconf/db/vendor",
-    ];
-
-    for path in &paths {
-        match fs::read_dir(path) {
-            Ok(entries) => {
-                let count = entries.count();
-                results.push(format!("{}: {} files", path, count));
-            }
-            Err(e) => {
-                results.push(format!("{}: ERROR - {}", path, e));
-            }
-        }
-    }
-
-    results.join("\n")
-}
 
 fn main() -> eframe::Result {
     let viewport = egui::ViewportBuilder::default().with_transparent(true);
@@ -42,7 +14,46 @@ fn main() -> eframe::Result {
         Box::new(|cc| {
             cc.egui_ctx.set_theme(ThemePreference::Dark);
 
-            let dconf_access = check_dconf_access();
+            let aurora_settings = SettingsService::new().unwrap();
+            if let Ok(font_settings) = aurora_settings.get_font_settings() {
+                let mut style = (*cc.egui_ctx.style()).clone();
+                style.text_styles.insert(
+                    egui::TextStyle::Small,
+                    egui::FontId::new(
+                        font_settings.size_small as f32,
+                        egui::FontFamily::Proportional,
+                    ),
+                );
+                style.text_styles.insert(
+                    egui::TextStyle::Body,
+                    egui::FontId::new(
+                        font_settings.size_medium as f32,
+                        egui::FontFamily::Proportional,
+                    ),
+                );
+                style.text_styles.insert(
+                    egui::TextStyle::Button,
+                    egui::FontId::new(
+                        font_settings.size_medium as f32,
+                        egui::FontFamily::Proportional,
+                    ),
+                );
+                style.text_styles.insert(
+                    egui::TextStyle::Monospace,
+                    egui::FontId::new(
+                        font_settings.size_medium as f32,
+                        egui::FontFamily::Proportional,
+                    ),
+                );
+                style.text_styles.insert(
+                    egui::TextStyle::Heading,
+                    egui::FontId::new(
+                        font_settings.size_large as f32,
+                        egui::FontFamily::Proportional,
+                    ),
+                );
+                cc.egui_ctx.set_style(style);
+            }
 
             let pixel_ratio = SettingsService::new()
                 .and_then(|s| s.get_pixel_ratio())
@@ -53,7 +64,7 @@ fn main() -> eframe::Result {
                 .and_then(|s| s.get_statusbar_height())
                 .unwrap_or(41) as f32;
 
-            Ok(Box::new(MyApp::new(statusbar_height, dconf_access)))
+            Ok(Box::new(MyApp::new(statusbar_height)))
         }),
     )
 }
@@ -61,21 +72,17 @@ fn main() -> eframe::Result {
 struct MyApp {
     active_tab: Tab,
     notification: NotificationState,
-    settings: SettingsState,
     status: String,
     statusbar_height: f32,
-    dconf_access: String,
 }
 
 impl MyApp {
-    fn new(statusbar_height: f32, dconf_access: String) -> Self {
+    fn new(statusbar_height: f32) -> Self {
         Self {
             active_tab: Tab::default(),
             notification: NotificationState::default(),
-            settings: SettingsState::default(),
             status: format!("Status bar height: {}", statusbar_height),
             statusbar_height,
-            dconf_access,
         }
     }
 }
@@ -84,9 +91,7 @@ impl MyApp {
 enum Tab {
     #[default]
     Notifications,
-    Theme,
-    Display,
-    Sound,
+    SystemInfo,
 }
 
 #[derive(Default)]
@@ -97,16 +102,6 @@ struct NotificationState {
     icon: String,
     timeout: i32,
     urgency: u8,
-}
-
-#[derive(Default)]
-struct SettingsState {
-    theme: ThemeSettings,
-    orientation: Orientation,
-    brightness: u32,
-    sound_profile: String,
-    sound_profiles: Vec<String>,
-    loaded: bool,
 }
 
 impl eframe::App for MyApp {
@@ -127,20 +122,14 @@ impl eframe::App for MyApp {
             ui.spacing_mut().item_spacing = egui::Vec2::new(10., 10.);
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.active_tab, Tab::Notifications, "Notifications");
-                ui.selectable_value(&mut self.active_tab, Tab::Theme, "Theme");
-                ui.selectable_value(&mut self.active_tab, Tab::Display, "Display");
-                ui.selectable_value(&mut self.active_tab, Tab::Sound, "Sound");
+                ui.selectable_value(&mut self.active_tab, Tab::SystemInfo, "System Info");
             });
 
-            ui.collapsing("DConf Access Check", |ui| {
-                ui.label(&self.dconf_access);
-            });
+            ui.add_space(5.0);
 
             match self.active_tab {
                 Tab::Notifications => self.show_notifications(ui),
-                Tab::Theme => self.show_theme(ui),
-                Tab::Display => self.show_display(ui),
-                Tab::Sound => self.show_sound(ui),
+                Tab::SystemInfo => self.show_system_info(ui),
             }
 
             if !self.status.is_empty() {
@@ -262,177 +251,64 @@ impl MyApp {
         }
     }
 
-    fn show_theme(&mut self, ui: &mut egui::Ui) {
-        ui.heading(RichText::new("Theme Settings (Read-only)").size(24.0));
-
-        if !self.settings.loaded {
-            if ui.button("Load Theme").clicked() {
-                self.load_theme();
-            }
-        } else {
-            ui.horizontal(|ui| {
-                ui.label("Active Ambience:");
-                if let Some(ref ambience) = self.settings.theme.active_ambience {
-                    ui.label(ambience);
-                }
-            });
-
-            ui.horizontal(|ui| {
-                ui.label("Color Scheme:");
-                if let Some(scheme) = self.settings.theme.color_scheme {
-                    ui.label(scheme.to_string());
-                }
-            });
-
-            ui.horizontal(|ui| {
-                ui.label("Highlight Color:");
-                if let Some(ref color) = self.settings.theme.highlight_color {
-                    ui.label(color);
-                }
-            });
-
-            ui.horizontal(|ui| {
-                ui.label("Primary Color:");
-                if let Some(ref color) = self.settings.theme.primary_color {
-                    ui.label(color);
-                }
-            });
-
-            ui.horizontal(|ui| {
-                ui.label("Secondary Color:");
-                if let Some(ref color) = self.settings.theme.secondary_color {
-                    ui.label(color);
-                }
-            });
-
-            ui.add_space(10.0);
-
-            if ui.button("Reload Theme").clicked() {
-                self.load_theme();
-            }
-        }
-    }
-
-    fn load_theme(&mut self) {
-        match SettingsService::new() {
-            Ok(service) => match service.get_theme() {
-                Ok(theme) => {
-                    self.settings.theme = theme;
-                    self.settings.loaded = true;
-                    self.status = "Theme loaded".to_string();
-                }
-                Err(e) => {
-                    self.status = format!("Error: {}", e);
-                }
-            },
-            Err(e) => {
-                self.status = format!("Failed to create service: {}", e);
-            }
-        }
-    }
-
-    fn show_display(&mut self, ui: &mut egui::Ui) {
-        ui.heading(RichText::new("Display Settings (Read-only)").size(24.0));
-
-        ui.horizontal(|ui| {
-            ui.label("Orientation Lock:");
-            ui.label(format!("{:?}", self.settings.orientation));
-        });
-
-        ui.horizontal(|ui| {
-            ui.label("Brightness:");
-            ui.label(self.settings.brightness.to_string());
-        });
+    fn show_system_info(&mut self, ui: &mut egui::Ui) {
+        ui.heading(RichText::new("System Info").size(24.0));
 
         ui.add_space(10.0);
 
-        if ui.button("Load Display Settings").clicked() {
-            self.load_display();
+        if ui.button("Load System Info").clicked() {
+            self.load_system_info();
         }
-    }
-
-    fn load_display(&mut self) {
-        match SettingsService::new() {
-            Ok(service) => match service.get_display() {
-                Ok(display) => {
-                    if let Some(orient) = display.orientation_lock {
-                        self.settings.orientation = orient;
-                    }
-                    if let Some(brightness) = display.brightness {
-                        self.settings.brightness = brightness;
-                    }
-                    self.status = "Display settings loaded".to_string();
-                }
-                Err(e) => {
-                    self.status = format!("Error: {}", e);
-                }
-            },
-            Err(e) => {
-                self.status = format!("Failed to create service: {}", e);
-            }
-        }
-    }
-
-    fn show_sound(&mut self, ui: &mut egui::Ui) {
-        ui.heading(RichText::new("Sound Settings").size(24.0));
-
-        ui.horizontal(|ui| {
-            ui.label("Current Profile:");
-            ui.label(&self.settings.sound_profile);
-        });
 
         ui.add_space(10.0);
 
-        if ui.button("Get Current Profile").clicked() {
-            self.get_sound_profile();
-        }
+        if let Ok(settings) = SettingsService::new() {
+            if let Ok(pixel_ratio) = settings.get_pixel_ratio() {
+                ui.horizontal(|ui| {
+                    ui.label("Pixel Ratio:");
+                    ui.label(format!("{:.2}", pixel_ratio));
+                });
+            }
 
-        if ui.button("Get Available Profiles").clicked() {
-            self.get_sound_profiles();
-        }
+            if let Ok(height) = settings.get_statusbar_height() {
+                ui.horizontal(|ui| {
+                    ui.label("Statusbar Height:");
+                    ui.label(format!("{} px", height));
+                });
+            }
 
-        if !self.settings.sound_profiles.is_empty() {
-            ui.add_space(10.0);
-            ui.label("Available profiles:");
-            for profile in &self.settings.sound_profiles.clone() {
-                if ui.button(profile).clicked() {
-                    self.settings.sound_profile = profile.clone();
-                }
+            if let Ok(fonts) = settings.get_font_settings() {
+                ui.add_space(10.0);
+                ui.label(RichText::new("Font Settings:").strong());
+                ui.horizontal(|ui| {
+                    ui.label("Family:");
+                    ui.label(&fonts.family);
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Size Tiny:");
+                    ui.label(format!("{} px", fonts.size_tiny));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Size Small:");
+                    ui.label(format!("{} px", fonts.size_small));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Size Medium:");
+                    ui.label(format!("{} px", fonts.size_medium));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Size Large:");
+                    ui.label(format!("{} px", fonts.size_large));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Size Huge:");
+                    ui.label(format!("{} px", fonts.size_huge));
+                });
             }
         }
     }
 
-    fn get_sound_profile(&mut self) {
-        match SettingsService::new() {
-            Ok(service) => match service.get_sound_profile() {
-                Ok(profile) => {
-                    self.settings.sound_profile = profile;
-                    self.status = "Profile loaded".to_string();
-                }
-                Err(e) => {
-                    self.status = format!("Error: {}", e);
-                }
-            },
-            Err(e) => {
-                self.status = format!("Failed to create service: {}", e);
-            }
-        }
-    }
-
-    fn get_sound_profiles(&mut self) {
-        match SettingsService::new() {
-            Ok(service) => match service.get_sound_profiles() {
-                Ok(profiles) => {
-                    self.settings.sound_profiles = profiles;
-                    self.status = "Profiles loaded".to_string();
-                }
-                Err(e) => {
-                    self.status = format!("Error: {}", e);
-                }
-            },
-            Err(e) => {
-                self.status = format!("Failed to create service: {}", e);
-            }
-        }
+    fn load_system_info(&mut self) {
+        self.status = "System info loaded".to_string();
     }
 }

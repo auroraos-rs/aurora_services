@@ -5,8 +5,8 @@ mod services;
 pub use backends::{Bus, DBusBackend, DConfBackend, DConfValue};
 pub use error::{AuroraError, Result};
 pub use services::{
-    DisplaySettings, FontSettings, Notification, NotificationBuilder, NotificationService,
-    Orientation, ServerInfo, SettingsService, SoundSettings, ThemeSettings, VariantValue,
+    FontSettings, Notification, NotificationBuilder, NotificationService, ServerInfo,
+    SettingsService, VariantValue,
 };
 
 pub fn notifications() -> Result<NotificationService> {
