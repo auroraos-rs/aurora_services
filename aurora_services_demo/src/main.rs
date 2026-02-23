@@ -2,6 +2,32 @@ use aurora_services::{
     NotificationBuilder, NotificationService, Orientation, SettingsService, ThemeSettings,
 };
 use eframe::egui::{self, Color32, RichText, ThemePreference};
+use std::fs;
+
+fn check_dconf_access() -> String {
+    let mut results = Vec::new();
+
+    let paths = [
+        "/etc/dconf/db/vendor.d",
+        "/etc/dconf/db/vendor-variant.d",
+        "/etc/dconf/db/nemo.d",
+        "/etc/dconf/db/vendor",
+    ];
+
+    for path in &paths {
+        match fs::read_dir(path) {
+            Ok(entries) => {
+                let count = entries.count();
+                results.push(format!("{}: {} files", path, count));
+            }
+            Err(e) => {
+                results.push(format!("{}: ERROR - {}", path, e));
+            }
+        }
+    }
+
+    results.join("\n")
+}
 
 fn main() -> eframe::Result {
     let viewport = egui::ViewportBuilder::default().with_transparent(true);
@@ -16,6 +42,8 @@ fn main() -> eframe::Result {
         Box::new(|cc| {
             cc.egui_ctx.set_theme(ThemePreference::Dark);
 
+            let dconf_access = check_dconf_access();
+
             let pixel_ratio = SettingsService::new()
                 .and_then(|s| s.get_pixel_ratio())
                 .unwrap_or(1.0) as f32;
@@ -25,7 +53,7 @@ fn main() -> eframe::Result {
                 .and_then(|s| s.get_statusbar_height())
                 .unwrap_or(41) as f32;
 
-            Ok(Box::new(MyApp::new(statusbar_height)))
+            Ok(Box::new(MyApp::new(statusbar_height, dconf_access)))
         }),
     )
 }
@@ -36,16 +64,18 @@ struct MyApp {
     settings: SettingsState,
     status: String,
     statusbar_height: f32,
+    dconf_access: String,
 }
 
 impl MyApp {
-    fn new(statusbar_height: f32) -> Self {
+    fn new(statusbar_height: f32, dconf_access: String) -> Self {
         Self {
             active_tab: Tab::default(),
             notification: NotificationState::default(),
             settings: SettingsState::default(),
             status: format!("Status bar height: {}", statusbar_height),
             statusbar_height,
+            dconf_access,
         }
     }
 }
@@ -100,6 +130,10 @@ impl eframe::App for MyApp {
                 ui.selectable_value(&mut self.active_tab, Tab::Theme, "Theme");
                 ui.selectable_value(&mut self.active_tab, Tab::Display, "Display");
                 ui.selectable_value(&mut self.active_tab, Tab::Sound, "Sound");
+            });
+
+            ui.collapsing("DConf Access Check", |ui| {
+                ui.label(&self.dconf_access);
             });
 
             match self.active_tab {
