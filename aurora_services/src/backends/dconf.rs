@@ -526,7 +526,10 @@ auto_scale_values=true
             normalize_path("desktop/sailfish/silica"),
             "desktop/sailfish/silica"
         );
-        assert_eq!(normalize_path("//desktop//silica"), "desktop/silica");
+        assert_eq!(
+            normalize_path("desktop/sailfish/silica/"),
+            "desktop/sailfish/silica"
+        );
     }
 
     #[test]
