@@ -412,3 +412,135 @@ fn parse_dconf_dict(s: &str) -> Result<DConfValue> {
 
     Ok(DConfValue::Dict(result))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_string() {
+        let result = parse_dconf_value("'ALS Hauss Variable'").unwrap();
+        assert_eq!(result.as_string().unwrap(), "ALS Hauss Variable");
+    }
+
+    #[test]
+    fn test_parse_int() {
+        let result = parse_dconf_value("29").unwrap();
+        assert_eq!(result.as_int().unwrap(), 29);
+    }
+
+    #[test]
+    fn test_parse_double() {
+        let result = parse_dconf_value("1.25").unwrap();
+        assert_eq!(result.as_double().unwrap(), 1.25);
+    }
+
+    #[test]
+    fn test_parse_bool() {
+        assert!(parse_dconf_value("true").unwrap().as_bool().unwrap());
+        assert!(!parse_dconf_value("false").unwrap().as_bool().unwrap());
+    }
+
+    #[test]
+    fn test_parse_empty() {
+        let result = parse_dconf_value("").unwrap();
+        assert!(matches!(result, DConfValue::Null));
+    }
+
+    #[test]
+    fn test_parse_array() {
+        let result = parse_dconf_value("['a', 'b', 'c']").unwrap();
+        let arr = result.as_array().unwrap();
+        assert_eq!(arr.len(), 3);
+        assert_eq!(arr[0].as_string().unwrap(), "a");
+        assert_eq!(arr[1].as_string().unwrap(), "b");
+        assert_eq!(arr[2].as_string().unwrap(), "c");
+    }
+
+    #[test]
+    fn test_parse_empty_array() {
+        let result = parse_dconf_value("[]").unwrap();
+        let arr = result.as_array().unwrap();
+        assert!(arr.is_empty());
+    }
+
+    #[test]
+    fn test_parse_dconf_file_silica() {
+        let content = r#"
+[desktop/sailfish/silica]
+theme_pixel_ratio=1.25
+theme_icon_subdir='z1.25'
+"#;
+        let backend = DConfBackend::new();
+        let mut cache: HashMap<String, DConfValue> = HashMap::new();
+        backend.parse_dconf_file(content, "desktop/sailfish/silica", &mut cache);
+
+        assert_eq!(
+            cache.get("theme_pixel_ratio").unwrap().as_double().unwrap(),
+            1.25
+        );
+        assert_eq!(
+            cache.get("theme_icon_subdir").unwrap().as_string().unwrap(),
+            "z1.25"
+        );
+    }
+
+    #[test]
+    fn test_parse_dconf_file_fonts() {
+        let content = r#"
+[apps/jolla-settings]
+default_signature_translation_id='la-default_signature_text'
+
+[desktop/sailfish/silica]
+tab_bar_style='aurora'
+font_family='ALS Hauss Variable'
+font_family_heading='ALS Hauss Variable'
+font_size_tiny=19
+font_size_extra_small=22
+font_size_small=25
+font_size_medium=29
+font_size_large=32
+font_size_extra_large=40
+font_size_huge=42
+auto_scale_values=true
+"#;
+        let backend = DConfBackend::new();
+        let mut cache: HashMap<String, DConfValue> = HashMap::new();
+        backend.parse_dconf_file(content, "desktop/sailfish/silica", &mut cache);
+
+        assert_eq!(
+            cache.get("font_family").unwrap().as_string().unwrap(),
+            "ALS Hauss Variable"
+        );
+        assert_eq!(cache.get("font_size_medium").unwrap().as_int().unwrap(), 29);
+        assert!(cache.get("auto_scale_values").unwrap().as_bool().unwrap());
+    }
+
+    #[test]
+    fn test_normalize_path() {
+        assert_eq!(
+            normalize_path("/desktop/sailfish/silica"),
+            "desktop/sailfish/silica"
+        );
+        assert_eq!(
+            normalize_path("desktop/sailfish/silica"),
+            "desktop/sailfish/silica"
+        );
+        assert_eq!(normalize_path("//desktop//silica"), "desktop/silica");
+    }
+
+    #[test]
+    fn test_unescape_string() {
+        assert_eq!(unescape_string("hello\\nworld"), "hello\nworld");
+        assert_eq!(unescape_string("hello\\tworld"), "hello\tworld");
+        assert_eq!(unescape_string("hello\\'world"), "hello'world");
+        assert_eq!(unescape_string("hello\\\\world"), "hello\\world");
+    }
+
+    #[test]
+    fn test_get_nonexistent_key() {
+        let mut backend = DConfBackend::new();
+        let result = backend.get("/nonexistent/path", "key").unwrap();
+        assert!(matches!(result, DConfValue::Null));
+    }
+}
