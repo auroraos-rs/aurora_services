@@ -1,4 +1,6 @@
-use aurora_services::{NotificationBuilder, NotificationService, SettingsService};
+use aurora_services::{
+    DeviceFeatures, DeviceInfoService, NotificationBuilder, NotificationService, SettingsService,
+};
 use eframe::egui::{self, Color32, RichText, ThemePreference};
 
 fn main() -> eframe::Result {
@@ -72,6 +74,7 @@ fn main() -> eframe::Result {
 struct MyApp {
     active_tab: Tab,
     notification: NotificationState,
+    device_info: DeviceInfoState,
     status: String,
     statusbar_height: f32,
 }
@@ -81,6 +84,7 @@ impl MyApp {
         Self {
             active_tab: Tab::default(),
             notification: NotificationState::default(),
+            device_info: DeviceInfoState::default(),
             status: format!("Status bar height: {}", statusbar_height),
             statusbar_height,
         }
@@ -91,6 +95,7 @@ impl MyApp {
 enum Tab {
     #[default]
     Notifications,
+    DeviceInfo,
     SystemInfo,
 }
 
@@ -102,6 +107,12 @@ struct NotificationState {
     icon: String,
     timeout: i32,
     urgency: u8,
+}
+
+#[derive(Default)]
+struct DeviceInfoState {
+    features: Option<DeviceFeatures>,
+    loaded: bool,
 }
 
 impl eframe::App for MyApp {
@@ -122,6 +133,7 @@ impl eframe::App for MyApp {
             ui.spacing_mut().item_spacing = egui::Vec2::new(10., 10.);
             ui.horizontal(|ui| {
                 ui.selectable_value(&mut self.active_tab, Tab::Notifications, "Notifications");
+                ui.selectable_value(&mut self.active_tab, Tab::DeviceInfo, "Device Info");
                 ui.selectable_value(&mut self.active_tab, Tab::SystemInfo, "System Info");
             });
 
@@ -129,6 +141,7 @@ impl eframe::App for MyApp {
 
             match self.active_tab {
                 Tab::Notifications => self.show_notifications(ui),
+                Tab::DeviceInfo => self.show_device_info(ui),
                 Tab::SystemInfo => self.show_system_info(ui),
             }
 
@@ -310,5 +323,175 @@ impl MyApp {
 
     fn load_system_info(&mut self) {
         self.status = "System info loaded".to_string();
+    }
+
+    fn show_device_info(&mut self, ui: &mut egui::Ui) {
+        ui.heading(RichText::new("Device Info").size(24.0));
+
+        ui.add_space(10.0);
+
+        if ui.button("Load Device Info").clicked() {
+            self.load_device_info();
+        }
+
+        ui.add_space(10.0);
+
+        if let Some(ref features) = self.device_info.features {
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                ui.label(RichText::new("Device").strong());
+                ui.horizontal(|ui| {
+                    ui.label("Model:");
+                    ui.label(&features.device_model);
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Serial Number:");
+                    ui.label(&features.serial_number);
+                });
+                ui.horizontal(|ui| {
+                    ui.label("OS Version:");
+                    ui.label(&features.os_version);
+                });
+                ui.horizontal(|ui| {
+                    ui.label("OS Type:");
+                    ui.label(&features.os_type);
+                });
+                ui.horizontal(|ui| {
+                    ui.label("OS Certified:");
+                    ui.label(if features.is_os_certified {
+                        "Yes"
+                    } else {
+                        "No"
+                    });
+                });
+                ui.horizontal(|ui| {
+                    ui.label("OS Certified:");
+                    ui.label(if features.is_os_certified {
+                        "Yes"
+                    } else {
+                        "No"
+                    });
+                });
+
+                ui.add_space(10.0);
+                ui.label(RichText::new("CPU").strong());
+                ui.horizontal(|ui| {
+                    ui.label("Model:");
+                    ui.label(&features.cpu_model);
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Cores:");
+                    ui.label(format!("{}", features.number_cpu_cores));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Max Clock:");
+                    ui.label(format!("{} MHz", features.max_cpu_clock_speed));
+                });
+                if !features.max_cpu_cores_clock_speed.is_empty() {
+                    ui.horizontal(|ui| {
+                        ui.label("Per Core:");
+                        ui.label(format!("{:?}", features.max_cpu_cores_clock_speed));
+                    });
+                }
+
+                ui.add_space(10.0);
+                ui.label(RichText::new("Memory").strong());
+                ui.horizontal(|ui| {
+                    ui.label("RAM Total:");
+                    ui.label(format!("{} MB", features.ram_total_size / 1024 / 1024));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("RAM Free:");
+                    ui.label(format!("{} MB", features.ram_free_size / 1024 / 1024));
+                });
+
+                ui.add_space(10.0);
+                ui.label(RichText::new("Screen").strong());
+                ui.horizontal(|ui| {
+                    ui.label("Resolution:");
+                    ui.label(&features.screen_resolution);
+                });
+
+                ui.add_space(10.0);
+                ui.label(RichText::new("Camera").strong());
+                ui.horizontal(|ui| {
+                    ui.label("Main:");
+                    ui.label(format!("{} MP", features.main_camera_resolution));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Frontal:");
+                    ui.label(format!("{} MP", features.frontal_camera_resolution));
+                });
+
+                ui.add_space(10.0);
+                ui.label(RichText::new("Battery").strong());
+                ui.horizontal(|ui| {
+                    ui.label("Charge:");
+                    ui.label(format!("{}%", features.battery_percentage));
+                });
+
+                ui.add_space(10.0);
+                ui.label(RichText::new("Hardware").strong());
+                ui.horizontal(|ui| {
+                    ui.label("Bluetooth:");
+                    ui.label(if features.has_bluetooth { "Yes" } else { "No" });
+                });
+                ui.horizontal(|ui| {
+                    ui.label("NFC:");
+                    ui.label(if features.has_nfc { "Yes" } else { "No" });
+                });
+                ui.horizontal(|ui| {
+                    ui.label("GNSS:");
+                    ui.label(if features.has_gnss { "Yes" } else { "No" });
+                });
+                ui.horizontal(|ui| {
+                    ui.label("WLAN:");
+                    ui.label(if features.has_wlan { "Yes" } else { "No" });
+                });
+
+                ui.add_space(10.0);
+                ui.label(RichText::new("Localization").strong());
+                ui.horizontal(|ui| {
+                    ui.label("Locale:");
+                    ui.label(&features.locale);
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Timezone:");
+                    ui.label(&features.time_zone);
+                });
+                if !features.locales.is_empty() {
+                    ui.horizontal(|ui| {
+                        ui.label("All Locales:");
+                        ui.label(features.locales.join(", "));
+                    });
+                }
+
+                if !features.font_family_names.is_empty() {
+                    ui.add_space(10.0);
+                    ui.label(RichText::new("Fonts").strong());
+                    ui.horizontal(|ui| {
+                        ui.label("Families:");
+                        ui.label(features.font_family_names.join(", "));
+                    });
+                }
+            });
+        }
+    }
+
+    fn load_device_info(&mut self) {
+        match DeviceInfoService::new() {
+            Ok(service) => match service.get_features() {
+                Ok(features) => {
+                    self.device_info.features = Some(features);
+                    self.device_info.loaded = true;
+                    self.status = "Device info loaded".to_string();
+                }
+                Err(e) => {
+                    self.status = format!("Error: {}", e);
+                }
+            },
+            Err(e) => {
+                self.status = format!("Failed to create service: {}", e);
+            }
+        }
     }
 }

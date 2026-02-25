@@ -9,3 +9,4 @@ Icon=com.example.aurora_services_demo
 [X-Application]
 OrganizationName=com.example
 ApplicationName=aurora_services_demo
+Permissions=DeviceInfo

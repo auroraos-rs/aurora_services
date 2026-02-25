@@ -4,21 +4,22 @@
 
 | Service | Status | Priority |
 |---------|--------|----------|
-| Notification Service | **In Progress** - Already partially implemented | 1 |
-| Contacts Service | Not started | 2 |
+| Notification Service | ✅ Completed | 1 |
+| DeviceInfo Service | ✅ Features provider completed | 2 |
 | Bluetooth Service | Not started | 3 |
 | NFC Service | Not started | 4 |
 | Voice Call Service | Not started | 5 |
-| DeviceInfo Service | Not started | 6 |
-| Location Service | Not started | 7 |
+| Location Service | Not started | 6 |
+
+**Note**: Contacts Service was removed - the `ru.auroraos.contacts1` D-Bus service is not available on devices.
 
 ---
 
 ## 1. Notification Service (`org.freedesktop.Notifications`)
 
-**Status**: ✅ **IN PROGRESS** - Already partially implemented
+**Status**: ✅ **COMPLETED**
 
-**Current Implementation** (`aurora_services/src/services/notifications.rs`):
+**Implementation** (`aurora_services/src/services/notifications.rs`):
 - `Notification` struct with all standard fields
 - `NotificationService` with methods:
   - `notify()` - Send notification
@@ -72,50 +73,7 @@
 
 ---
 
-## 2. Contacts Service (`ru.auroraos.contacts1`)
-
-**Status**: Not started
-
-**Bus**: Session  
-**Service Name**: `ru.auroraos.contacts1`
-
-**Libraries**: `auroracontacts` (pkgconfig: `auroracontacts.pc`)
-
-**Key Classes**:
-- `Aurora::Contacts::ContactsManager` - Main entry point for Contacts API
-- `Aurora::Contacts::Contact` - Contact data (phone numbers, names, avatars)
-
-**D-Bus Interfaces**:
-- `ru.auroraos.contacts1.Manager` - Contact management
-- `ru.auroraos.contacts1.Contact` - Individual contact
-
-**Manager Methods**:
-- `QueryContacts() -> array` - Get all contacts
-- `QueryCollections() -> array` - Get contact collections
-- `QueryVersion() -> uint` - Get database version
-
-**Manager Signals**:
-- `VersionChanged(version)` - Database version changed
-- `ContactsAdded(contacts)` - Contacts were added
-- `ContactsRemoved(contacts)` - Contacts were removed
-- `ContactsChanged(contacts)` - Contacts were modified
-
-**Contact Properties**:
-- `ContactName` - Full name
-- `Phones` - Phone numbers with labels
-- `Emails` - Email addresses with labels
-- `Addresses` - Physical addresses
-- `SignificantDates` - Birthdays, anniversaries
-- `contactCompany` - Company information
-- `Note` - Free-form note
-- `WebAddress` - Website URLs
-- `Avatar` - Contact avatar
-
-**Required Permission**: `Contacts` in desktop file
-
----
-
-## 3. Bluetooth Service (`org.bluez`)
+## 2. Bluetooth Service (`org.bluez`)
 
 **Status**: Not started
 
@@ -186,7 +144,7 @@
 
 ---
 
-## 4. NFC Service (`org.sailfishos.nfc.daemon`)
+## 3. NFC Service (`org.sailfishos.nfc.daemon`)
 
 **Status**: Not started
 
@@ -243,7 +201,7 @@ ard.NDEF` - NDEF read/write operations
 
 ---
 
-## 5. Voice Call Service (`ru.auroraos.Call`)
+## 4. Voice Call Service (`ru.auroraos.Call`)
 
 **Status**: Not started
 
@@ -318,55 +276,57 @@ ard.NDEF` - NDEF read/write operations
 
 ---
 
-## 6. DeviceInfo Service (`ru.omp.deviceinfo`)
+## 5. DeviceInfo Service (`ru.omp.deviceinfo`)
 
-**Status**: Not started
+**Status**: ✅ **Features provider completed** (Storages and SIM pending)
 
 **Bus**: System  
 **Service Name**: `ru.omp.deviceinfo`  
 **Object Path**: `/ru/omp/deviceinfo/*`
 
-**Key Interfaces**:
+### Implemented: Features Provider
 
-### Features (`ru.omp.deviceinfo.Features`)
-**Properties**:
-- Various device feature flags
+**Object Path**: `/ru/omp/deviceinfo/Features`  
+**Interface**: `ru.omp.deviceinfo.Features`
 
-**Methods**:
-- Get feature availability
+**Implementation** (`aurora_services/src/services/device_info/features.rs`):
+- `DeviceInfoService` struct with `get_features()` method
+- `DeviceFeatures` struct with all device properties:
+  - Device: model, serial number, OS version, OS type, certified, emulated
+  - CPU: model, cores, clock speed, per-core speeds
+  - Memory: RAM total/free
+  - Screen: resolution
+  - Camera: main and frontal resolutions
+  - Battery: charge percentage
+  - Hardware: Bluetooth, NFC, GNSS, WLAN
+  - Localization: locale, timezone, locales, fonts
 
-### Storages (`ru.omp.deviceinfo.Storages`)
-**Properties**:
-- `TotalRom` - Total ROM size
-- `AvailableRom` - Available ROM
-- `TotalRam` - Total RAM size
-- `AvailableRam` - Available RAM
+### Pending: Storages Provider
 
-**Methods**:
-- `GetStorages()` -> Get storage information
-
-### SIM (`ru.omp.deviceinfo.SIM`)
-**Properties**:
-- `IccId` - SIM card ICCID
-- `OperatorName` - Network operator
-- `Mcc` - Mobile country code
-- `Mnc` - Mobile network code
+**Object Path**: `/ru/omp/deviceinfo/Storages`  
+**Interface**: `ru.omp.deviceinfo.Storages`
 
 **Methods**:
-- `GetSimInfo()` -> Get SIM information
+- `getInternalStorageInfo()` - Internal flash memory
+- `getExternalStorageInfo()` - External storage (deprecated)
+- `getInternalUserPartitionInfo()` - User partition
+- `getExternalStorageDrivesInfo()` - External drives
+- `getSystemStorageInfo()` - System storage info
+- `getUsersQuotaInfo()` - User quotas
 
-**Features**:
-- Screen resolution and pixel ratio
-- ROM/RAM capacity
-- CPU frequency
-- SIM card information
-- Hardware model and manufacturer
+### Pending: SIM Provider
+
+**Object Path**: `/ru/omp/deviceinfo/SIM`  
+**Interface**: `ru.omp.deviceinfo.SIM`
+
+**Methods**:
+- `getSimCardsInfo()` - Get SIM card information
 
 **Required Permission**: `DeviceInfo` in desktop file
 
 ---
 
-## 7. Location Service (`ru.omp.LocationService`)
+## 6. Location Service (`ru.omp.LocationService`)
 
 **Status**: Not started
 
@@ -410,8 +370,7 @@ ard.NDEF` - NDEF read/write operations
 
 | Service | Dependencies |
 |---------|--------------|
-| Notification | `dbus`, `serde` (in progress) |
-| Contacts | `dbus`, `serde`, SQLite |
+| Notification | `dbus`, `serde` (completed) |
 | Bluetooth | `dbus`, `serde` |
 | NFC | `dbus`, `serde`, NFC hardware |
 | Voice Call | `dbus`, `serde`, telephony backend |
@@ -422,10 +381,9 @@ ard.NDEF` - NDEF read/write operations
 
 ## Recommended Implementation Order
 
-1. **Notification Service** - Continue current work, add signal handling
-2. **Contacts Service** - Well-defined API via existing library
-3. **DeviceInfo Service** - Simple read-only interface, good starting point
-4. **Bluetooth Service** - Start with Adapter interface
-5. **NFC Service** - Medium complexity, hardware-dependent
-6. **Voice Call Service** - Complex state machine
-7. **Location Service** - Configuration-focused
+1. **Notification Service** - Completed
+2. **Bluetooth Service** - Start with Adapter interface
+3. **DeviceInfo Service** - Simple read-only interface
+4. **NFC Service** - Medium complexity, hardware-dependent
+5. **Voice Call Service** - Complex state machine
+6. **Location Service** - Configuration-focused
