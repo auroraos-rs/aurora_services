@@ -1,9 +1,0 @@
-[package]
-name = "aurora_services"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-dbus = "0.9"
-serde = { version = "1", features = ["derive"] }
-thiserror = "1"

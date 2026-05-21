@@ -1,12 +1,10 @@
-# AGENTS.md - Aurora Services
+# Agent Notes
 
 ## Project Overview
 
-Rust workspace for Aurora OS system services. Provides D-Bus and DConf backends for notifications, settings, and system configuration.
+`aurora_services` is a Rust library providing Aurora OS platform service wrappers.
 
-**Workspace Structure:**
-- `aurora_services/` - Main library crate
-- `aurora_services_demo/` - Demo GUI application using eframe/egui
+Provides Rust-friendly access to DConf settings, DBus notifications, and device info via the Aurora OS system bus. All services gracefully fall back to sensible defaults when DConf or DBus is unavailable (e.g. on desktop Linux during development).
 
 **Target Platform:** Aurora OS (Sailfish-based Linux)
 
@@ -15,20 +13,18 @@ Rust workspace for Aurora OS system services. Provides D-Bus and DConf backends 
 ## Build Commands
 
 ```bash
-# Build entire workspace
+# Build library
 cargo build
 
 # Build in release mode
 cargo build --release
 
-# Build specific crate
-cargo build -p aurora_services
-cargo build -p aurora_services_demo
-
-# Cross-compile and build RPM packages (requires PSDK_DIR env)
-./arm_build.sh      # armv7hl RPM
-./aarch64_build.sh  # aarch64 RPM
+# Cross-compile for Aurora OS devices
+cross build --release --target aarch64-unknown-linux-gnu
+cross build --release --target armv7-unknown-linux-gnueabihf
 ```
+
+Requires `libdbus-1-dev` on the target architecture (configured in `Cross.toml` for the consuming GUI workspace).
 
 ---
 
@@ -37,9 +33,6 @@ cargo build -p aurora_services_demo
 ```bash
 # Run all tests
 cargo test
-
-# Run tests for specific crate
-cargo test -p aurora_services
 
 # Run single test
 cargo test test_parse_string
@@ -64,9 +57,6 @@ cargo check
 
 # Run clippy linter
 cargo clippy
-
-# Run clippy with all warnings
-cargo clippy -- -W clippy::all
 
 # Format code
 cargo fmt
@@ -96,14 +86,12 @@ use std::collections::HashMap;
 
 | Type | Convention | Example |
 |------|------------|---------|
-| Crates | snake_case | `aurora_services` |
 | Modules | snake_case | `mod notifications;` |
 | Types (struct, enum) | PascalCase | `NotificationService`, `AuroraError` |
 | Traits | PascalCase | `Into<DConfValue>` |
 | Functions | snake_case | `get_sound_profile()` |
 | Variables | snake_case | `active_ambience` |
 | Constants | SCREAMING_SNAKE_CASE | `NOTIFICATIONS_SERVICE` |
-| Static | SCREAMING_SNAKE_CASE | `DCONF_DB_PATH` |
 
 ### Constants
 
@@ -117,14 +105,14 @@ const NOTIFICATIONS_INTERFACE: &str = "org.freedesktop.Notifications";
 
 ### Error Handling
 
-Use `thiserror` for error types. Return `Result<T, AuroraError>` from all public functions.
+Use `thiserror` for error types. Return `Result<T>` from all public functions.
 
 ```rust
 #[derive(Error, Debug)]
 pub enum AuroraError {
     #[error("DBus error: {0}")]
     DBus(String),
-    
+
     #[error("Invalid value type: expected {expected}, got {actual}")]
     InvalidType { expected: String, actual: String },
 }
@@ -136,18 +124,6 @@ Use `.map_err()` to convert external errors:
 
 ```rust
 Connection::new_system().map_err(|e| AuroraError::ConnectionFailed(e.to_string()))?;
-```
-
-### Default Implementations
-
-Provide `Default` for types with sensible defaults:
-
-```rust
-impl Default for NotificationService {
-    fn default() -> Self {
-        Self::new().expect("Failed to create NotificationService")
-    }
-}
 ```
 
 ### Builder Pattern
@@ -174,7 +150,7 @@ Place tests in same file under `#[cfg(test)]` module:
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_parse_string() {
         let result = parse_dconf_value("'test'").unwrap();
@@ -188,7 +164,7 @@ mod tests {
 ## Architecture
 
 ```
-aurora_services/src/
+src/
 ├── lib.rs              # Public API, re-exports
 ├── error.rs            # Error types with thiserror
 ├── backends/
@@ -197,8 +173,10 @@ aurora_services/src/
 │   └── dconf.rs        # DConf settings reader
 └── services/
     ├── mod.rs
-    ├── notifications.rs # NotificationService
-    └── settings.rs      # SettingsService (theme, display, sound)
+    ├── device_info/    # DeviceInfoService (feature detection)
+    ├── notifications.rs # NotificationService (notify-rust backed)
+    ├── package_info.rs  # Package/runtime dir helpers
+    └── settings.rs      # SettingsService (theme, display, fonts)
 ```
 
 ---
@@ -208,9 +186,9 @@ aurora_services/src/
 | Crate | Purpose |
 |-------|---------|
 | `dbus` | D-Bus IPC |
+| `notify-rust` | Freedesktop Notifications wire protocol (dbus 0.9 backend) |
 | `serde` | Serialization (derive) |
 | `thiserror` | Error derive |
-| `eframe` | GUI framework (demo only) |
 
 ---
 
@@ -219,7 +197,7 @@ aurora_services/src/
 | Service | Purpose |
 |---------|---------|
 | `org.freedesktop.Notifications` | Desktop notifications |
-| `com.nokia.profiled` | Sound profiles |
+| `ru.omp.deviceinfo.Features` | Device feature detection |
 
 ---
 
@@ -228,10 +206,6 @@ aurora_services/src/
 | Path | Keys |
 |------|------|
 | `/desktop/sailfish/silica` | Font settings, pixel ratio |
-| `/desktop/jolla/theme` | Theme configuration |
-| `/desktop/jolla/theme/color` | Color scheme |
-| `/lipstick` | Orientation lock |
-| `/jolla/sound` | Sound theme |
 
 ---
 
@@ -239,6 +213,5 @@ aurora_services/src/
 
 - DBus connections are wrapped in `Mutex` for thread safety
 - DConf backend caches values in memory
-- Demo uses egui for UI
-- Cross-compilation requires `PSDK_DIR` environment variable pointing to Aurora PSDK installation
+- `notify-rust` sends `urgency` as `byte` by default; we use `Hint::CustomInt("urgency", level)` for Aurora OS compatibility
 - Cross-compilation requires `libdbus-1-dev` on target architecture
