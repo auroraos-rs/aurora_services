@@ -1,10 +1,13 @@
-[workspace]
-resolver = "2"
-members = [
-    "aurora_services",
-    "aurora_services_demo",
-]
+[package]
+name = "aurora_services"
+version = "0.1.0"
+edition = "2024"
+description = "Aurora OS platform services (settings, notifications, device info)"
+authors = ["Maksim Leiman <maximleyman@yandex.ru>"]
+license = "Apache 2.0"
 
-[patch.crates-io]
-winit = { git = "https://github.com/lmaxyz/winit", branch = "aurora" }
-glutin = { git = "https://github.com/lmaxyz/glutin", branch = "aurora_device_fix" }
+[dependencies]
+dbus = "0.9"
+notify-rust = { version = "4", default-features = false, features = ["d"] }
+serde = { version = "1", features = ["derive"] }
+thiserror = "2.0"
