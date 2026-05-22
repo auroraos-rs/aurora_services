@@ -11,8 +11,11 @@ pub use services::{
 };
 
 pub mod package_info {
-    use super::services;
-    pub use services::package_info::{app_id, app_instance_id, package_name, runtime_dir};
+    pub use super::services::package_info::{app_id, app_instance_id, package_name, runtime_dir};
+}
+
+pub mod open_uri {
+    pub use super::services::open_uri::open_uri;
 }
 
 pub fn notifications() -> Result<NotificationService> {

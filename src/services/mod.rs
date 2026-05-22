@@ -1,7 +1,9 @@
 mod device_info;
 mod notifications;
-pub mod package_info;
 mod settings;
+
+pub mod open_uri;
+pub mod package_info;
 
 pub use device_info::{DeviceFeatures, DeviceInfoService};
 pub use notifications::{
