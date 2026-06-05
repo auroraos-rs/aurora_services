@@ -1,7 +1,7 @@
 use crate::backends::{Bus, DBusBackend};
 use crate::error::Result;
 
-const MCE_SERVICE: &str = "com.nokia.mce.request";
+const MCE_SERVICE: &str = "com.nokia.mce";
 const MCE_PATH: &str = "/com/nokia/mce/request";
 const MCE_INTERFACE: &str = "com.nokia.mce.request";
 
