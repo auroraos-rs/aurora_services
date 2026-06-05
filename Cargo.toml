@@ -1,6 +1,6 @@
 [package]
 name = "aurora_services"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "Aurora OS platform services (settings, notifications, device info)"
 authors = ["Maksim Leiman <maximleyman@yandex.ru>"]
